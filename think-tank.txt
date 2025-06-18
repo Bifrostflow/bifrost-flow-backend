@@ -1,0 +1,20 @@
+#Tools
+Every tool will have three messages for model
+
+SYSTEM_PROMPT
+PREV_ASSISTANT_MESSAGE (LAST MESSAGE)
+ASSISTANT_PROMPT(TOOL_SPECIFIC)
+USER_PROMPT (will be there from start)
+
+ORDER----
+
+system: SYSTEM_PROMPT --- temp
+user: USER_PROMPT (will be there from start)
+assistant: PREV_ASSISTANT_MESSAGE (LAST MESSAGE)
+user: ASSISTANT_PROMPT(TOOL_SPECIFIC) --temp
+
+
+
+State will manage
+PREV_ASSISTANT_MESSAGE (LAST MESSAGE)
+USER_PROMPT (will be there from start)

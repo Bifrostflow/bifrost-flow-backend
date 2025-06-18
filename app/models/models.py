@@ -1,5 +1,6 @@
 from typing import List, Literal
 
+from openai.types.chat import ChatCompletionAssistantMessageParam, ChatCompletionUserMessageParam
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
@@ -51,7 +52,8 @@ class Node(TypedDict):
     next_node_id: List[str]
 
 class Response(TypedDict):
-    message:str|None
+    messages:List[ChatCompletionUserMessageParam
+                 | ChatCompletionAssistantMessageParam]
     type:str|None
     meta:str|None
 
@@ -66,9 +68,7 @@ class EvaluateCodeModel(BaseModel):
     type:str
 
 class State(TypedDict):
-    prompt: str
     response: Response
-    last_step:None|str
     possible_next_nodes:List[str]|None
 
 

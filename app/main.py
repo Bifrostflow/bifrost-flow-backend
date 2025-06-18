@@ -2,7 +2,7 @@ from bson import ObjectId
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-
+from openai.types.chat import ChatCompletionUserMessageParam
 
 from app.db.mongo import node_collection, flow_collection
 from app.models.models import CreateFlow, CreateNode, GraphData, Node, State, Response
@@ -46,21 +46,35 @@ async def run_flows_by_id(data:GraphData):
     print("----")
     # return nodes
     conditionalSteps,graph=await create_graph(nodes)
+    user_prompt=ChatCompletionUserMessageParam(role="user",content=data.input)
+    messages=[user_prompt]
     response:Response={
-        "message":"",
+        "messages":messages,
         "type":None,
         "meta":""
     }
     _state: State = {
-        "prompt": data.input,
         "possible_next_nodes":conditionalSteps,
         "response": response,
-        "last_step":"start"
     }
 
     result = await graph.ainvoke(_state)
-    print(result.get("response").get("message"))
-    return result.get("response")
+
+    print(result.get("response"))
+
+    result_messages=result.get("response").get("messages")
+
+    response_messages=[]
+    for item in result_messages:
+        if item.get("role")=="assistant" and item.get("content"):
+            response_messages.append(item.get("content"))
+
+    response_data:Response={
+        "meta":result.get("response").get("meta"),
+        "type":result.get("response").get("type"),
+        "messages":response_messages
+    }
+    return response_data
 
 
 @app.post("/create-node")

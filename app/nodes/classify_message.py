@@ -1,16 +1,17 @@
 from bson import ObjectId
 from dotenv import load_dotenv
 from openai import OpenAI
-from openai.types.chat import ChatCompletionUserMessageParam
-
+from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssistantMessageParam, \
+    ChatCompletionSystemMessageParam
+from typing import List
 from app.db.mongo import node_collection
 from app.models.models import State, Response, ResponseModel
 
 CLASSIFY_MESSAGE="classify_message"
+load_dotenv()
 async def classify_message(state:State):
-    print("--- doing classification")
-    load_dotenv()
     client = OpenAI()
+    print("--- doing classification")
     next_nodes=state.get("possible_next_nodes")
     print(next_nodes)
 
@@ -23,33 +24,49 @@ async def classify_message(state:State):
         prefixed_type=f"{node_id_prefix}-{node.get("type")}"
         typeMap[prefixed_type]=p_node
 
-        # FIX THIS PROMPT SO AI CAN DIFFERENTIATE BETWEEN TWO SAME types
-        nextNodeStepsCheck += f"/n {prefixed_type}: {node.get("what_i_do")} and this `{node_id_prefix}` as prefix"
+        # TODO FIX THIS PROMPT SO AI CAN DIFFERENTIATE BETWEEN TWO SAME types
+        nextNodeStepsCheck += f"\n{prefixed_type}: {node.get("what_i_do")} and this `{node_id_prefix}` as prefix"
 
-    # SYSTEM_PROMPT=f"""Check if this prompt satisfy this below checks and along with response send the output of this check as type in JSON formate
-    #     PROMPT-START:
-    #     {state.get("prompt")}
-    #     PROMPT-END:
-    #     -- Check for this
-    #     {nextNodeStepsCheck}
-    #     """
+    system_prompt="""
+    You are a data classifier and your job isto get prompt and response data pattern `type` from user with `description` about that type
+    and return appropriate type 
+    """
+
+    print('---')
+    print("1: ",state.get("response"))
+    print("2: ",state.get("response").get("messages"))
+    print("3: ",state.get("response").get("messages")[0])
+    print("4: ",state.get("response").get("messages")[0].get("content"))
+    print('---')
+    prompt=state.get("response").get("messages")[0].get("content")
+    user_message=f"""
+        PROMPT-START:
+        Prompt: {prompt}
+        PROMPT-END:
+        
+        -- Check for this
+        {nextNodeStepsCheck}
+        """
+    print("prompt ",user_message)
+
+    messages: List[ChatCompletionSystemMessageParam|ChatCompletionUserMessageParam|ChatCompletionAssistantMessageParam]=[
+        ChatCompletionSystemMessageParam(role="system",content=system_prompt),
+        ChatCompletionUserMessageParam(role="user",content=user_message),
+        ]
+
     query_res = client.beta.chat.completions.parse(
         model="gpt-4.1-nano",
         response_format=ResponseModel,
-        messages=[
-            {"role": "system", "content": nextNodeStepsCheck},
-            ChatCompletionUserMessageParam(role="user", content=state.get("prompt"))
-        ],
+        messages=messages,
     )
     prompt_type=query_res.choices[0].message.parsed.type
     prompt_prefix=query_res.choices[0].message.parsed.prefix
     route_id=f"{prompt_prefix}-{prompt_type}"
-    print("prompt_type ",route_id,typeMap[route_id])
+
     response: Response = {
         "type":typeMap[route_id],
-        "message": state.get("response").get('message'),
-        "meta": ""
+        "messages": state.get("response").get('messages'),
+        "meta": state.get("response").get("meta")
     }
     state["response"] = response
-    state["last_step"] = CLASSIFY_MESSAGE
     return state

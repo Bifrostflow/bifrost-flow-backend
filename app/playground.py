@@ -132,3 +132,57 @@ for node in data:
 
 
 # print(graph_builder)
+
+# CONDITIONAL
+#  [
+#     {
+#         "source": "1-684d858808dca10a34a65a53",
+#         "target": "2-684d8a5608dca10a34a65a55",
+#         "id": "xy-edge__1-684d858808dca10a34a65a53-2-684d8a5608dca10a34a65a55"
+#     },
+#     {
+#         "source": "2-684d8a5608dca10a34a65a55",
+#         "target": "3-684a0a2a14df3de4f4f6845d",
+#         "id": "xy-edge__2-684d8a5608dca10a34a65a55-3-684a0a2a14df3de4f4f6845d"
+#     },
+#     {
+#         "source": "3-684a0a2a14df3de4f4f6845d",
+#         "target": "6-684e733dc2b59ec01fb72c77",
+#         "id": "xy-edge__3-684a0a2a14df3de4f4f6845d-6-684e733dc2b59ec01fb72c77"
+#     },
+#     {
+#         "source": "2-684d8a5608dca10a34a65a55",
+#         "target": "4-684a0c5df84f78f814367574",
+#         "id": "xy-edge__2-684d8a5608dca10a34a65a55-4-684a0c5df84f78f814367574"
+#     },
+#     {
+#         "source": "4-684a0c5df84f78f814367574",
+#         "target": "5-684a08e28f7c63eb043302d1",
+#         "id": "xy-edge__4-684a0c5df84f78f814367574-5-684a08e28f7c63eb043302d1"
+#     },
+#     {
+#         "source": "5-684a08e28f7c63eb043302d1",
+#         "target": "6-684e733dc2b59ec01fb72c77",
+#         "id": "xy-edge__5-684a08e28f7c63eb043302d1-6-684e733dc2b59ec01fb72c77"
+#     }
+# ]
+
+# LINEAR
+
+# [
+#     {
+#         "source": "4-684a0c5df84f78f814367574",
+#         "target": "3-684a0a2a14df3de4f4f6845d",
+#         "id": "xy-edge__4-684a0c5df84f78f814367574-3-684a0a2a14df3de4f4f6845d"
+#     },
+#     {
+#         "source": "1-684d858808dca10a34a65a53",
+#         "target": "4-684a0c5df84f78f814367574",
+#         "id": "xy-edge__1-684d858808dca10a34a65a53-4-684a0c5df84f78f814367574"
+#     },
+#     {
+#         "source": "3-684a0a2a14df3de4f4f6845d",
+#         "target": "7-684e733dc2b59ec01fb72c77",
+#         "id": "xy-edge__3-684a0a2a14df3de4f4f6845d-7-684e733dc2b59ec01fb72c77"
+#     }
+# ]
