@@ -2,12 +2,7 @@ from typing import List, TypedDict
 
 from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssistantMessageParam
 
-from app.models.models import State, Response
-
-
-class ChatHistory(TypedDict):
-    state: State
-    tool_prompt:None|ChatCompletionUserMessageParam
+from app.models.models import Response, ChatHistory
 
 
 # system: SYSTEM_PROMPT --- temp : TOOL

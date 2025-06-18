@@ -5,6 +5,100 @@ from models.models import Node,State
 from nodes.distribute import distribute
 from nodes.route_query import route_query
 
+'''
+Nodes
+write code
+write message
+write email and send
+convert message to md formate
+
+Frontend:
+
+Response: {  // for backend, no Response on frontend
+            message:string, 
+            type:node_type
+        } 
+Node: {
+    id:string, 
+    node_id:string, 
+    prompt:string, 
+    response:Response,
+    flow_type: "linear" | "conditional",
+    next_edge: node_id[]
+}
+
+flow_data:Node[] 
+class Node(TypedDict):
+    id: str
+    node_id: str
+    node_type: str
+    prompt:str
+    flow_type: str
+    next_node_id: List[str]
+[
+    {
+        id:"1j2uigbewiu2wke"
+        node_id:"START", 
+        prompt:"How are you?", 
+        flow_type: "linear",
+        next_edge: ["classify_message"]
+    },
+    {
+        id:"12345678", 
+        node_id:"classify_message", 
+        prompt:"How are you?", 
+        flow_type: "conditional",
+        next_edge: ["write_message","write_code"]
+    },
+    {
+        id:"12345678", 
+        node_id:"write_code", 
+        prompt:"How are you?", 
+        flow_type: "linear"
+        next_edge: ["evaluate_code"]
+    },
+    {
+        id:"12345678", 
+        node_id:"evaluate_code", 
+        prompt:"How are you?", 
+        flow_type: "linear"
+        next_edge: ["END"]
+    },
+    {
+        id:"12345678", 
+        node_id:"write_message", 
+        prompt:"How are you?", 
+        flow_type: "linear"
+        next_edge: ["END"]
+    },
+]
+
+
+"next_nodes": ["write_code_id", "write_message_id"]
+
+for every node
+i will create a prompt like this 
+
+nextNodeStepsCheck="Check if this prompt satisfy this below checks and along with response send the output of this check as type in JSON formate"
+for next_node_id in node.next_nodes
+    next_node = await db.get(next_node_id)
+    nextNodeStepsCheck+=f"/n {next_node.what_i_do} return type as {next_node.type} if prompt satisfy this."
+
+f"${node.prompt}/n/n/n ${nextNodeStepsCheck}" # this will return Eg: {response:"some message", type:"write_message"}
+    "name": "Write Code",
+    "type": "write_code",
+    "gpt_model":"gpt-4.1",
+    "llm": "openai",
+    "description": "To write code based on prompt provided by user.",
+    "what_i_do": "Check if the provided prompt satisfies this type 'write_code' if yes return type as 'write_code' else Ignore"
+
+ {
+      "id": "xy-edge__6-684a0a2a14df3de4f4f6845d-5-end",
+      "source": "6-684a0a2a14df3de4f4f6845d",
+      "target": "5-end"
+    },    
+'''
+
 data:List[Node]=[
     {
         "id":"1j2uigbewiu2wke",

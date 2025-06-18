@@ -6,8 +6,6 @@ from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionSyst
 from app.models.models import State, Response
 from app.nodes.node_helpers.manage_messages import ChatHistory, manage_flow_chat_history
 
-WRITE_CODE="write_code"
-
 def write_code(state:State):
     print("🤖 --- doing write_code",state.get("node_data"))
     load_dotenv()

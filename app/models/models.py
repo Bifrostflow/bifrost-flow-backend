@@ -77,5 +77,7 @@ class State(TypedDict):
     response: Response
     node_data:None | NodeData
 
-
+class ChatHistory(TypedDict):
+    state: State
+    tool_prompt:None|ChatCompletionUserMessageParam
 
