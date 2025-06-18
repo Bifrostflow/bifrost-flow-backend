@@ -4,11 +4,12 @@ from bson import ObjectId
 from langgraph.constants import START,END
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
-from app.models.models import UserEdge
+from app.models.models import UserEdge, NodeData
 from app.db.mongo import node_collection
 from app.nodes.classify_message import CLASSIFY_MESSAGE, classify_message
 from app.nodes.distribute import distribute
 from app.models.models import  Node, State
+from app.nodes.node_helpers.with_node_data import with_node_data
 
 
 async def convert_edges_to_nodes(edges: List[UserEdge]) -> List[Node]:
@@ -23,8 +24,8 @@ async def convert_edges_to_nodes(edges: List[UserEdge]) -> List[Node]:
     result: List[Node] = []
     for source_node_id, targets in node_map.items():
         node_id=source_node_id.split("-")[1]
-        node = await node_collection.find_one({"_id":ObjectId(node_id)},{"_id":0,"type": 1})
-        node_type = node.get("type")
+        found_node = await node_collection.find_one({"_id":ObjectId(node_id)},{"_id":0,"type": 1})
+        node_type = found_node.get("type")
 
         # Flow type based on node_type
         flow_type = "conditional" if (len(targets)>1) else "linear"
@@ -46,7 +47,7 @@ async def convert_edges_to_nodes(edges: List[UserEdge]) -> List[Node]:
 
     return result
 
-async def create_graph(nodes:List[Node])->Tuple[List[str],CompiledStateGraph]:
+async def create_graph(nodes:List[Node])->CompiledStateGraph:
     graph_builder = StateGraph(State)
 
     # CREATE NODES
@@ -61,16 +62,20 @@ async def create_graph(nodes:List[Node])->Tuple[List[str],CompiledStateGraph]:
 
         if is_conditional:
 
-            print(f"61: graph_builder.add_node({classify_count}-{CLASSIFY_MESSAGE},{classify_message})")
-            graph_builder.add_node(f"{classify_count}-{CLASSIFY_MESSAGE}",classify_message)
+            classify_node_id=f"{classify_count}-{CLASSIFY_MESSAGE}"
+            print(f"61: graph_builder.add_node({classify_node_id},{classify_message})")
+            next_nodes_graph_id=req.get("next_node_id")
+
+            data=NodeData(node_graph_id=classify_node_id,next_nodes=next_nodes_graph_id)
+            graph_builder.add_node(classify_node_id,with_node_data(data=data,tool=classify_message))
             classify_count=classify_count+1
         if node_data.get("category")!="initiate":
             print(f"63: graph_builder.add_node({node_graph_id},{node_type_tool})")
-            graph_builder.add_node(node_graph_id,node_type_tool)
+            data=NodeData(node_graph_id=node_graph_id,next_nodes=None)
+            graph_builder.add_node(node_graph_id,with_node_data(data=data,tool=node_type_tool))
 
 
     # CREATE EDGES
-    conditional_routes_list=[]
     classification_id_tracker=dict()
     classify_count_edge=0
     for node in nodes:
@@ -118,8 +123,6 @@ async def create_graph(nodes:List[Node])->Tuple[List[str],CompiledStateGraph]:
 
             print(f"89: graph_builder.add_conditional_edges({classification_id}, {next_routing_tool})")
             graph_builder.add_conditional_edges(classification_id, next_routing_tool)
-            for n in node.get("next_node_id"):
-                conditional_routes_list.append(n)
         else:
             start_edge_graph_id=node.get('node_id')
             if next_edge_data.get("category")=='conditional':
@@ -143,6 +146,4 @@ async def create_graph(nodes:List[Node])->Tuple[List[str],CompiledStateGraph]:
                 print(f"102: graph_builder.add_edge({start_edge_graph_id},{next_edge_graph_id})")
                 graph_builder.add_edge(start_edge_graph_id,next_edge_graph_id)
 
-    print("103: conditional_routes_list: ",conditional_routes_list)
-    # return conditional_routes_list
-    return conditional_routes_list,graph_builder.compile()
+    return graph_builder.compile()

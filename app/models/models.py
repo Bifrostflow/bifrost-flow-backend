@@ -5,6 +5,8 @@ from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
 
 
+
+
 class CreateFlow(BaseModel):
     name: str = Field(..., min_length=2, max_length=20)
     description: str = Field(..., min_length=2, max_length=100)
@@ -67,8 +69,13 @@ class EvaluateCodeModel(BaseModel):
     remark:str
     type:str
 
+class NodeData(TypedDict):
+    node_graph_id:str
+    next_nodes:None|List[str]
+
 class State(TypedDict):
     response: Response
-    possible_next_nodes:List[str]|None
+    node_data:None | NodeData
+
 
 

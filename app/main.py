@@ -45,7 +45,7 @@ async def run_flows_by_id(data:GraphData):
     print('-->',nodes)
     print("----")
     # return nodes
-    conditionalSteps,graph=await create_graph(nodes)
+    graph=await create_graph(nodes)
     user_prompt=ChatCompletionUserMessageParam(role="user",content=data.input)
     messages=[user_prompt]
     response:Response={
@@ -54,8 +54,8 @@ async def run_flows_by_id(data:GraphData):
         "meta":""
     }
     _state: State = {
-        "possible_next_nodes":conditionalSteps,
         "response": response,
+        "node_data":None
     }
 
     result = await graph.ainvoke(_state)

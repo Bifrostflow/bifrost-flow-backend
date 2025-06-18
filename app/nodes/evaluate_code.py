@@ -10,7 +10,7 @@ from app.nodes.node_helpers.manage_messages import ChatHistory, manage_flow_chat
 EVALUATE_CODE="evaluate_code"
 
 def evaluate_code(state:State):
-    print("evaluate_code",state)
+    print("🤖 --- doing evaluate_code", state.get("node_data"))
     load_dotenv()
     client = OpenAI()
 

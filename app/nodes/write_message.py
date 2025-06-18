@@ -8,7 +8,7 @@ from app.nodes.node_helpers.manage_messages import ChatHistory, manage_flow_chat
 
 WRITE_MESSAGE="write_message"
 def write_message(state:State):
-    print("--- doing write_message")
+    print("🤖 --- doing write_message", state.get("node_data"))
     load_dotenv()
     client = OpenAI()
 

@@ -8,13 +8,13 @@ from app.db.mongo import node_collection
 from app.models.models import State, Response, ResponseModel
 
 CLASSIFY_MESSAGE="classify_message"
-load_dotenv()
 async def classify_message(state:State):
+    print("🤖 --- doing classification", state.get("node_data"))
+    load_dotenv()
     client = OpenAI()
-    print("--- doing classification")
-    next_nodes=state.get("possible_next_nodes")
-    print(next_nodes)
 
+    next_nodes=state.get("node_data").get("next_nodes")
+    print("next_nodes: ",next_nodes)
     nextNodeStepsCheck =""
     typeMap=dict()
     for p_node in next_nodes:
@@ -32,12 +32,6 @@ async def classify_message(state:State):
     and return appropriate type 
     """
 
-    print('---')
-    print("1: ",state.get("response"))
-    print("2: ",state.get("response").get("messages"))
-    print("3: ",state.get("response").get("messages")[0])
-    print("4: ",state.get("response").get("messages")[0].get("content"))
-    print('---')
     prompt=state.get("response").get("messages")[0].get("content")
     user_message=f"""
         PROMPT-START:
@@ -47,7 +41,6 @@ async def classify_message(state:State):
         -- Check for this
         {nextNodeStepsCheck}
         """
-    print("prompt ",user_message)
 
     messages: List[ChatCompletionSystemMessageParam|ChatCompletionUserMessageParam|ChatCompletionAssistantMessageParam]=[
         ChatCompletionSystemMessageParam(role="system",content=system_prompt),
