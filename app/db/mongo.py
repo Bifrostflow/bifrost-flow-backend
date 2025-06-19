@@ -1,13 +1,12 @@
 import os
 
+import certifi
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
-from pymongo import MongoClient
 
 load_dotenv()
 username = os.getenv("MONGO_USERNAME")
 password = os.getenv("MONGO_PASS")
-import certifi
 ca = certifi.where()
 
 uri = f"mongodb+srv://{username}:{password}@cluster0.bv1rtx0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
