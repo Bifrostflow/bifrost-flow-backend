@@ -1,6 +1,6 @@
-from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
 from app.controllers.create_flow import use_create_flow
 from app.controllers.create_node import use_create_node
@@ -24,7 +24,7 @@ app.add_middleware(
 
 @app.get("/test")
 async  def test():
-    return await {"test":"test"}
+    return {"test":"test"}
 
 @app.post("/create-flow")
 async def create_flow(flow_data:CreateFlow):
@@ -42,10 +42,10 @@ async def run_flows_by_id(data:GraphData):
 async def create_node(node_data:CreateNode):
     return await use_create_node(node_data)
 
-@app.get("/system-nodes")
+@app.get("/system-tools")
 async def get_system_nodes():
     return await use_get_system_nodes()
 
-@app.get("/system-nodes/{node_id}")
+@app.get("/system-tools/{node_id}")
 async def get_system_node_by_id(node_id:str):
     return await use_get_system_node_by_id(node_id=node_id)
