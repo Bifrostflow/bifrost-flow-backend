@@ -1,4 +1,4 @@
-from typing import List, Literal
+from typing import List
 
 from openai.types.chat import ChatCompletionAssistantMessageParam, ChatCompletionUserMessageParam
 from pydantic import BaseModel, Field
@@ -12,7 +12,7 @@ class CreateFlow(BaseModel):
     description: str = Field(..., min_length=2, max_length=100)
     data: str #JSON stringify
     """
-        nodes:Node[]
+        tools:Node[]
         edges:Edge[]
         NodeInputState:
             prompt: string
@@ -57,7 +57,7 @@ class Response(TypedDict):
     messages:List[ChatCompletionUserMessageParam
                  | ChatCompletionAssistantMessageParam]
     type:str|None
-    meta:str|None
+    meta:List[str]
 
 class ResponseModel(BaseModel):
     type:str
@@ -80,4 +80,10 @@ class State(TypedDict):
 class ChatHistory(TypedDict):
     state: State
     tool_prompt:None|ChatCompletionUserMessageParam
+
+class CodeDocumentation(BaseModel):
+    content:str
+    file_name_without_extension:str
+    response_message:str
+    type: str
 
