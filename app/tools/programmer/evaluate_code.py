@@ -5,7 +5,7 @@ from openai import OpenAI
 from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssistantMessageParam, \
     ChatCompletionSystemMessageParam
 from app.models.models import Response, State, EvaluateCodeModel
-from app.nodes.node_helpers.manage_messages import ChatHistory, manage_flow_chat_history
+from app.tools.tools_helpers.manage_messages import ChatHistory, manage_flow_chat_history
 
 EVALUATE_CODE="evaluate_code"
 
@@ -58,7 +58,9 @@ def evaluate_code(state:State):
     response: Response = {
         "type": state.get("response").get("type"),
         "messages": messages,
-        "meta":json.dumps(meta)
+        "meta":[*state.get("response").get("meta"),
+                json.dumps(meta)
+                ]
     }
     state["response"] = response
 

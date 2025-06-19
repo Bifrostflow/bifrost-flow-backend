@@ -4,7 +4,7 @@ from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionSyst
     ChatCompletionAssistantMessageParam
 
 from app.models.models import State, Response
-from app.nodes.node_helpers.manage_messages import ChatHistory, manage_flow_chat_history
+from app.tools.tools_helpers.manage_messages import ChatHistory, manage_flow_chat_history
 
 def write_code(state:State):
     print("🤖 --- doing write_code",state.get("node_data"))
@@ -27,6 +27,7 @@ def write_code(state:State):
     # Create chat data
     chat_data = ChatHistory(state=state, tool_prompt=tool_chat)
     messages = manage_flow_chat_history(data=chat_data)
+
     query_res = client.chat.completions.create(
         model="gpt-4.1",
         messages=[

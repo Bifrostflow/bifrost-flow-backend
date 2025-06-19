@@ -2,8 +2,8 @@ from typing import List
 
 from langgraph.graph import StateGraph
 from models.models import Node,State
-from nodes.distribute import distribute
-from nodes.route_query import route_query
+from tools.distribute import distribute
+from app.tools.conditional.route_query import route_query
 
 '''
 Nodes
@@ -278,5 +278,23 @@ for node in data:
 #         "source": "3-684a0a2a14df3de4f4f6845d",
 #         "target": "7-684e733dc2b59ec01fb72c77",
 #         "id": "xy-edge__3-684a0a2a14df3de4f4f6845d-7-684e733dc2b59ec01fb72c77"
+#     }
+# ]
+
+# [
+#     {
+#         "source": "4-684a0c5df84f78f814367574",
+#         "target": "3-6853a91c8ed701f2efcd6fd1",
+#         "id": "xy-edge__4-684a0c5df84f78f814367574-3-6853a91c8ed701f2efcd6fd1"
+#     },
+#     {
+#         "source": "1-684d858808dca10a34a65a53",
+#         "target": "4-684a0c5df84f78f814367574",
+#         "id": "xy-edge__1-684d858808dca10a34a65a53-4-684a0c5df84f78f814367574"
+#     },
+#     {
+#         "source": "3-6853a91c8ed701f2efcd6fd1",
+#         "target": "7-684e733dc2b59ec01fb72c77",
+#         "id": "xy-edge__3-6853a91c8ed701f2efcd6fd1-7-684e733dc2b59ec01fb72c77"
 #     }
 # ]

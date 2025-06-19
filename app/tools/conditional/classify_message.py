@@ -15,21 +15,21 @@ async def classify_message(state:State):
 
     next_nodes=state.get("node_data").get("next_nodes")
     print("next_nodes: ",next_nodes)
-    nextNodeStepsCheck =""
-    typeMap=dict()
+    next_node_steps_check =""
+    type_map=dict()
     for p_node in next_nodes:
         node_id=p_node.split("-")[1]
         node_id_prefix=p_node.split("-")[0]
         node = await node_collection.find_one({"_id": ObjectId(node_id)}, {"_id": 0,"type":1, "what_i_do": 1})
         prefixed_type=f"{node_id_prefix}-{node.get("type")}"
-        typeMap[prefixed_type]=p_node
+        type_map[prefixed_type]=p_node
 
         # TODO FIX THIS PROMPT SO AI CAN DIFFERENTIATE BETWEEN TWO SAME types
-        nextNodeStepsCheck += f"\n{prefixed_type}: {node.get("what_i_do")} and this `{node_id_prefix}` as prefix"
+        next_node_steps_check += f"\n{prefixed_type}: {node.get("what_i_do")} and this `{node_id_prefix}` as prefix"
 
     system_prompt="""
     You are a data classifier and your job isto get prompt and response data pattern `type` from user with `description` about that type
-    and return appropriate type 
+    and return appropriate type.
     """
 
     prompt=state.get("response").get("messages")[0].get("content")
@@ -39,7 +39,7 @@ async def classify_message(state:State):
         PROMPT-END:
         
         -- Check for this
-        {nextNodeStepsCheck}
+        {next_node_steps_check}
         """
 
     messages: List[ChatCompletionSystemMessageParam|ChatCompletionUserMessageParam|ChatCompletionAssistantMessageParam]=[
@@ -57,7 +57,7 @@ async def classify_message(state:State):
     route_id=f"{prompt_prefix}-{prompt_type}"
 
     response: Response = {
-        "type":typeMap[route_id],
+        "type":type_map[route_id],
         "messages": state.get("response").get('messages'),
         "meta": state.get("response").get("meta")
     }

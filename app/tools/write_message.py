@@ -4,7 +4,7 @@ from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssi
     ChatCompletionSystemMessageParam
 
 from app.models.models import State, Response
-from app.nodes.node_helpers.manage_messages import ChatHistory, manage_flow_chat_history
+from app.tools.tools_helpers.manage_messages import ChatHistory, manage_flow_chat_history
 
 def write_message(state:State):
     print("🤖 --- doing write_message", state.get("node_data"))
@@ -15,7 +15,7 @@ def write_message(state:State):
     system_prompt="""
                    You are an agent which generates messages/text based on user prompt.
                    You will not generate code or any data which is not general text or simple user prompt.
-                   you can help the summerize things like blogs, codes, documentation, news, articles, etc.
+                   you can help the summarize things like blogs, codes, documentation, news, articles, etc.
                    Refuse to generate without enough context 
                    """
     tool_prompt="write message based on provided response"
