@@ -1,15 +1,15 @@
 from collections import defaultdict
-from typing import List, Tuple
+from typing import List
 from bson import ObjectId
 from langgraph.constants import START,END
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from app.models.models import UserEdge, NodeData
 from app.db.mongo import node_collection
-from app.nodes.classify_message import CLASSIFY_MESSAGE, classify_message
-from app.nodes.distribute import distribute
+from app.tools.conditional.classify_message import CLASSIFY_MESSAGE, classify_message
+from app.tools.distribute import distribute
 from app.models.models import  Node, State
-from app.nodes.node_helpers.with_node_data import with_node_data
+from app.tools.tools_helpers.with_node_data import with_node_data
 
 
 async def convert_edges_to_nodes(edges: List[UserEdge]) -> List[Node]:
@@ -21,7 +21,7 @@ async def convert_edges_to_nodes(edges: List[UserEdge]) -> List[Node]:
         target = edge["target"]
         node_map[source].append(target)
 
-    result: List[Node] = []
+    nodes: List[Node] = []
     for source_node_id, targets in node_map.items():
         node_id=source_node_id.split("-")[1]
         found_node = await node_collection.find_one({"_id":ObjectId(node_id)},{"_id":0,"type": 1})
@@ -43,9 +43,9 @@ async def convert_edges_to_nodes(edges: List[UserEdge]) -> List[Node]:
             "next_node_id": targets
         }
 
-        result.append(node)
+        nodes.append(node)
 
-    return result
+    return nodes
 
 async def create_graph(nodes:List[Node])->CompiledStateGraph:
     graph_builder = StateGraph(State)
