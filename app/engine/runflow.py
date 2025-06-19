@@ -71,7 +71,8 @@ async def create_graph(nodes:List[Node])->CompiledStateGraph:
             classify_count=classify_count+1
         if node_data.get("category")!="initiate":
             print(f"63: graph_builder.add_node({node_graph_id},{node_type_tool})")
-            data=NodeData(node_graph_id=node_graph_id,next_nodes=None)
+            req.get("next_node_id")
+            data=NodeData(node_graph_id=node_graph_id,next_nodes=req.get("next_node_id"))
             graph_builder.add_node(node_graph_id,with_node_data(data=data,tool=node_type_tool))
 
 
