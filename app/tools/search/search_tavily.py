@@ -36,9 +36,7 @@ def tavily_search(state: State):
     messages.append(user_request)
     response_chat_data = ChatCompletionAssistantMessageParam(role="assistant", content=message)
     messages.append(response_chat_data)
-    print("------MESSAGES")
-    print(messages)
-    print("------MESSAGES")
+
     response: Response = {
         "messages": messages,
         "type": state.get("response").get("type"),
