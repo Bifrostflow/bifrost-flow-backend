@@ -12,7 +12,6 @@ from app.models.models import Response, ChatHistory
 
 def manage_flow_chat_history(data:ChatHistory)->List[ChatCompletionUserMessageParam | ChatCompletionAssistantMessageParam]:
     response:Response=data.get("state").get("response")
-    is_untouched_prompt=len(response.get("messages"))==1
     messages:List[ChatCompletionUserMessageParam
                  | ChatCompletionAssistantMessageParam] = response.get("messages")
     is_untouched_prompt=len(messages)==1
