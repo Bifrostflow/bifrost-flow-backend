@@ -36,6 +36,17 @@ async def use_run_flow(data:GraphData):
 async def stream_graph(graph:CompiledStateGraph,state:State):
     result = graph.astream(state, stream_mode="updates")
     async for chunk in result:
-        print('==>',chunk)
         await asyncio.sleep(0.1)
-        yield f"data: {json.dumps({'chunk': "working"})}\n\n"
+        chunk_data_response:Response={
+            "messages":[],
+            "meta":state.get("response").get("meta"),
+            "type":state.get("response").get("type"),
+        }
+        response_data = [*chunk.values()][0].get("response")
+        chunk_data_response["messages"]=response_data.get("messages")[-1]
+        chunk_data:State={
+            "node_data":state.get("node_data"),
+            "response":chunk_data_response
+        }
+        print("chunk_data::: ",chunk_data)
+        yield f"data: {json.dumps(chunk_data)}\n\n"
