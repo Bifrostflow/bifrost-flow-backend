@@ -1,4 +1,4 @@
-from typing import List
+from typing import List,Dict
 
 from openai.types.chat import ChatCompletionAssistantMessageParam, ChatCompletionUserMessageParam
 from pydantic import BaseModel, Field
@@ -11,21 +11,6 @@ class CreateFlow(BaseModel):
     name: str = Field(..., min_length=2, max_length=20)
     description: str = Field(..., min_length=2, max_length=100)
     data: str #JSON stringify
-    """
-        tools:Node[]
-        edges:Edge[]
-        NodeInputState:
-            prompt: string
-            result: string
-            is_success: boolean
-            helping_data: 
-        Node:
-        
-            tool:tool_id
-            state:NodeInputState
-            
-            //Every node will take specific system decided state and return same type of state        
-    """
 
 class CreateNode(BaseModel):
     name: str = Field(..., min_length=2, max_length=20)
@@ -40,6 +25,7 @@ class UserEdge(TypedDict):
     id:str
     source:str
     target:str
+    tool_input:str|None
 
 class GraphData(BaseModel):
     data:List[UserEdge]
@@ -52,6 +38,7 @@ class Node(TypedDict):
     prompt:str
     flow_type: str
     next_node_id: List[str]
+    node_input:str|None
 
 class Response(TypedDict):
     messages:List[ChatCompletionUserMessageParam
@@ -71,11 +58,12 @@ class EvaluateCodeModel(BaseModel):
 
 class NodeData(TypedDict):
     node_graph_id:str
+    node_input:str|None
     next_nodes:None|List[str]
 
 class State(TypedDict):
     response: Response
-    node_data:None | NodeData
+    node_data:None | NodeData # node info only
 
 class ChatHistory(TypedDict):
     state: State

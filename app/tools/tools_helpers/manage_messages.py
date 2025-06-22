@@ -1,4 +1,4 @@
-from typing import List, TypedDict
+from typing import List
 
 from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssistantMessageParam
 
@@ -12,10 +12,9 @@ from app.models.models import Response, ChatHistory
 
 def manage_flow_chat_history(data:ChatHistory)->List[ChatCompletionUserMessageParam | ChatCompletionAssistantMessageParam]:
     response:Response=data.get("state").get("response")
-    messages=[
-        *response.get("messages"),
-    ]
-    is_untouched_prompt=len(response.get("messages"))==1
+    messages:List[ChatCompletionUserMessageParam
+                 | ChatCompletionAssistantMessageParam] = response.get("messages")
+    is_untouched_prompt=len(messages)==1
     if data.get("tool_prompt") and not is_untouched_prompt:
         messages.append(data.get("tool_prompt"))
     return messages

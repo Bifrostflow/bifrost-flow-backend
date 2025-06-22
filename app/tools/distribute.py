@@ -5,6 +5,7 @@ from app.tools.programmer.code_documentation import code_documentation
 from app.tools.programmer.evaluate_code import evaluate_code
 from app.tools.programmer.write_code import write_code
 from app.tools.messaging.write_mail_and_send import send_mail
+from app.tools.search.search_tavily import tavily_search
 from app.tools.write_message import write_message
 
 distribute={
@@ -15,5 +16,6 @@ distribute={
     "classify_message":classify_message,
     "evaluate_code":evaluate_code,
     "code_documentation":code_documentation,
-    "doc_to_pdf":doc_to_pdf
+    "doc_to_pdf":doc_to_pdf,
+    "tavily_search":tavily_search,
 }

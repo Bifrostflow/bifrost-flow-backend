@@ -9,7 +9,7 @@ from app.controllers.get_system_node_by_id import use_get_system_node_by_id
 from app.controllers.get_system_nodes import use_get_system_nodes
 from app.controllers.run_flow import use_run_flow
 
-from app.models.models import CreateFlow, CreateNode, GraphData, State, Response
+from app.models.models import CreateFlow, CreateNode, GraphData
 
 
 app = FastAPI()
@@ -35,7 +35,7 @@ async def get_flows():
     return await use_get_flow()
 
 @app.post("/run-flow")
-async def run_flows_by_id(data:GraphData):
+async def run_flow(data:GraphData):
     return await use_run_flow(data=data)
 
 @app.post("/create-node")

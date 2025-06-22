@@ -27,7 +27,6 @@ def write_message(state:State):
     # Create chat data
     chat_data = ChatHistory(state=state, tool_prompt=tool_chat)
     messages = manage_flow_chat_history(data=chat_data)
-
     query_res = client.chat.completions.create(
         model="gpt-4.1-mini",
         messages=[
