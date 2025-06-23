@@ -6,10 +6,10 @@ from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
 from app.models.models import UserEdge, NodeData
 from app.db.mongo import node_collection
-from app.tools.conditional.classify_message import CLASSIFY_MESSAGE, classify_message
-from app.tools.distribute import distribute
+from app.controllers.tools.conditional.classify_message import CLASSIFY_MESSAGE, classify_message
+from app.controllers.tools.distribute import distribute
 from app.models.models import  Node, State
-from app.tools.tools_helpers.with_node_data import with_node_data
+from app.controllers.tools.tools_helpers.with_node_data import with_node_data
 
 
 async def convert_edges_to_nodes(edges: List[UserEdge]) -> List[Node]:

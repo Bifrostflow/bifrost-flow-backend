@@ -5,7 +5,7 @@ from openai import OpenAI
 from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssistantMessageParam, \
     ChatCompletionSystemMessageParam
 from app.models.models import Response, State, EvaluateCodeModel
-from app.tools.tools_helpers.manage_messages import ChatHistory, manage_flow_chat_history
+from app.controllers.tools.tools_helpers.manage_messages import ChatHistory, manage_flow_chat_history
 
 EVALUATE_CODE="evaluate_code"
 
