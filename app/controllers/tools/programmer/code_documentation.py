@@ -4,8 +4,8 @@ from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssi
     ChatCompletionSystemMessageParam
 import json
 from app.models.models import State, Response, CodeDocumentation
-from app.prompts.programmer.code_documentation import code_documentation_system_prompt, code_documentation_tool_prompt
-from app.tools.tools_helpers.manage_messages import ChatHistory, manage_flow_chat_history
+from app.controllers.prompts.programmer.code_documentation import code_documentation_system_prompt, code_documentation_tool_prompt
+from app.controllers.tools.tools_helpers.manage_messages import ChatHistory, manage_flow_chat_history
 
 CODE_DOCUMENTATION= "code_documentation"
 

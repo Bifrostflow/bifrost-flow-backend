@@ -2,15 +2,14 @@ import time
 from typing import Literal
 import json
 
-from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionSystemMessageParam, \
-    ChatCompletionAssistantMessageParam
+from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssistantMessageParam
 
 from app.models.models import State, ChatHistory, Response
-from app.tools.programmer.code_documentation import CODE_DOCUMENTATION
+from app.controllers.tools.programmer.code_documentation import CODE_DOCUMENTATION
 
 from xhtml2pdf import pisa
 
-from app.tools.tools_helpers.manage_messages import manage_flow_chat_history
+from app.controllers.tools.tools_helpers.manage_messages import manage_flow_chat_history
 
 
 async def doc_to_pdf(state:State):

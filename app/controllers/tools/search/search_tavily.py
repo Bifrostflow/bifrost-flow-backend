@@ -1,13 +1,10 @@
 import os
 
 from dotenv import load_dotenv
-from openai import OpenAI
-from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssistantMessageParam, \
-    ChatCompletionSystemMessageParam
+from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssistantMessageParam
 from tavily import TavilyClient
 
 from app.models.models import State, Response
-from app.tools.tools_helpers.manage_messages import ChatHistory, manage_flow_chat_history
 
 
 def tavily_search(state: State):
