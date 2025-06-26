@@ -49,3 +49,7 @@ async def get_system_nodes():
 @app.get("/system-tools/{node_id}")
 async def get_system_node_by_id(node_id:str):
     return await use_get_system_node_by_id(node_id=node_id)
+
+@app.get("/verify-user")
+async def verify_user():
+
