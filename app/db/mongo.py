@@ -5,9 +5,9 @@ from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
 load_dotenv()
-ca = certifi.where()
 username = os.getenv("MONGO_USERNAME")
 password = os.getenv("MONGO_PASS")
+ca = certifi.where()
 
 uri = f"mongodb+srv://{username}:{password}@cluster0.bv1rtx0.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0"
 # client = AsyncIOMotorClient(uri)
