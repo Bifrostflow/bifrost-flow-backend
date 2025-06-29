@@ -1,4 +1,3 @@
-from fastapi import HTTPException
 from jose import jwt
 from pydantic import BaseModel
 from supabase import SupabaseException
@@ -59,14 +58,16 @@ def check_user_exist(jwks:any,token:str)->UserExistResponse:
         if not user_id:
             res=UserExistResponse(isExist=False)
             return res
-    except:
+    except SupabaseException as e:
+        print(e)
         res = UserExistResponse(isExist=False)
         return res
     try:
         response = super_supabase.table("users").select("clerk_id").eq("clerk_id",user_id).execute()
-        print("RES ",response.data[0])
+        print("RES ",response.data)
         res = UserExistResponse(isExist=len(response.data)==1)
         return res
-    except:
+    except SupabaseException as e:
+        print(e)
         res = UserExistResponse(isExist=False)
         return res
