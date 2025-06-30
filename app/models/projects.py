@@ -6,27 +6,15 @@ class Project(BaseModel):
     name: str
     description: Optional[str] = None
     user_id: Optional[str] = None
+    users:Optional[str]|None
+    edges:Optional[str]|None
+    nodes:Optional[str]|None
+    api_keys:Optional[str]|None
 
 class EditProject(BaseModel):
     name: str
     description: Optional[str] = None
     id: str
-
-class EdgeDB(BaseModel):
-    data: Optional[str] = None
-    api_keys: Optional[str] = None
-    flow_id: str
-    user_id: Optional[str] = None
-
-class NodeDB(BaseModel):
-    data: Optional[str] = None
-    flow_id: str
-    user_id: Optional[str] = None
-
-class CollaboratorDB(BaseModel):
-    users: Optional[str] = None
-    flow_id: str
-    user_id: Optional[str] = None
 
 class CollaboratorInfo(BaseModel):
     uid:str

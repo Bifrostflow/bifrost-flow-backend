@@ -23,7 +23,8 @@ async def use_run_flow(jwks:any,token:str,data:GraphData):
             return res
         exist = check_user_exist(jwks,token)
         if exist.isExist:
-            collaborators_data=super_supabase.table("collaborators").select("users").eq("flow_id",data.flow_id).execute()
+            
+            collaborators_data=super_supabase.table("flows").select("users").eq("id",data.flow_id).eq("user_id",user_id).execute()
             c_users=ast.literal_eval(collaborators_data.data[0].get("users"))
             users=c_users.get("data")
             has_access = any(user.get("uid") == user_id for user in users)

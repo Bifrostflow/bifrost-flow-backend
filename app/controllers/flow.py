@@ -2,7 +2,7 @@ from fastapi_clerk_auth import HTTPAuthorizationCredentials
 from supabase import SupabaseException
 
 from app.controllers.supabase_auth.create_project import load_supabase_nodes, update_supabase_nodes
-from app.models.projects import NodeDB, UpdateFlowGraph
+from app.models.projects import  UpdateFlowGraph
 import os
 import requests
 

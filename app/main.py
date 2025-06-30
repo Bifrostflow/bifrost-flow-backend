@@ -40,18 +40,9 @@ app.add_middleware(
 async  def test():
     return {"test":"test"}
 
-@app.post("/run-flow")
-async def run_flow(data:GraphData,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
-    jwks_url = os.getenv("JWKS")
-    jwks = requests.get(jwks_url).json()
-    try:
-        return await use_run_flow(jwks=jwks,token=credentials.credentials,data=data)
-    except SupabaseException as e:
-        return {"isSuccess": False, "message": "Something went wrong.","error":e}
-
-@app.post("/create-node")
-async def create_node(node_data:CreateNode):
-    return await use_create_node(node_data)
+# @app.post("/create-node")
+# async def create_node(node_data:CreateNode):
+#     return await use_create_node(node_data)
 
 @app.get("/system-tools")
 async def get_system_nodes():
@@ -61,14 +52,7 @@ async def get_system_nodes():
 async def get_system_node_by_id(node_id:str):
     return await use_get_system_node_by_id(node_id=node_id)
 
-
-
 # USER
-@app.post("/verify-user")
-async def verify_user(user:UserInfo,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
-    print(credentials.credentials,user)
-    return "woho"
-
 @app.post("/create-user")
 async def create_user(credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
     jwks_url = os.getenv("JWKS")
@@ -144,3 +128,12 @@ async def update_nodes(flow_graph: UpdateFlowGraph,credentials: HTTPAuthorizatio
 @app.get("/load-nodes")
 async def load_nodes(flow_id: str,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
     return await load_nodes_controller(flow_id,credentials)
+
+@app.post("/run-flow")
+async def run_flow(data:GraphData,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
+    jwks_url = os.getenv("JWKS")
+    jwks = requests.get(jwks_url).json()
+    try:
+        return await use_run_flow(jwks=jwks,token=credentials.credentials,data=data)
+    except SupabaseException as e:
+        return {"isSuccess": False, "message": "Something went wrong.","error":e}
