@@ -48,5 +48,5 @@ def write_code(state:State):
         "meta": state.get("response").get("meta")
     }
     state["response"] = response
-
+    state["ui_response"] = "Finished writing code."
     return state

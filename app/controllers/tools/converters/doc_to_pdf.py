@@ -28,6 +28,7 @@ async def doc_to_pdf(state:State):
                 # write pdf to local_temp
                 # upload pdf to remote
                 convert_to_pdf(content,"html",file_name_without_extension)
+        state["ui_response"] = "Conversion completed."
         return state
     else:
         tool_chat = ChatCompletionUserMessageParam(role="user", content="")
@@ -37,19 +38,27 @@ async def doc_to_pdf(state:State):
         messages = manage_flow_chat_history(data=chat_data)
         content = messages[0].get("content")
         print("content: ",content)
-        convert_to_pdf(content, "html", f"{time.time()}")
-        response_chat_data = ChatCompletionAssistantMessageParam(role="assistant", content="Document successfully generated.")
-        messages.append(response_chat_data)
-
-        response: Response = {
-            "type": state.get("response").get("type"),
-            "messages": messages,
-            "meta": [*state.get("response").get("meta"),
-                     json.dumps(meta)
-                     ]
-        }
-        state["response"] = response
-        return  state
+        filename=convert_to_pdf(content, "html", f"{time.time()}")
+        if filename:    
+            response_chat_data = ChatCompletionAssistantMessageParam(role="assistant", content="Document successfully generated.")
+            messages.append(response_chat_data)
+            response: Response = {
+                "type": state.get("response").get("type"),
+                "messages": messages,
+                "meta": state.get("response").get("meta")
+            }
+            state["response"] = response
+            state["ui_response"] = "Document successfully generated."
+            return  state
+        else:
+            response: Response = {
+                "type": state.get("response").get("type"),
+                "messages": messages,
+                "meta": state.get("response").get("meta")
+            }
+            state["response"] = response
+            state["ui_response"] = "Failed to generate."
+            return  state
 
 def convert_to_pdf(content: str, content_type: Literal["markdown","html"] = "markdown", output_path: str="") -> str:
     # Convert markdown to HTML if needed
@@ -67,7 +76,9 @@ def convert_to_pdf(content: str, content_type: Literal["markdown","html"] = "mar
     # Generate the PDF
     file_name=f"{output_path}.pdf"
     is_success=convert_html_to_pdf(html_content,file_name)
-    return file_name
+    if is_success:
+        return file_name
+    return None
 
 
 

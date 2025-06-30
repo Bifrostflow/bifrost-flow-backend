@@ -24,7 +24,7 @@ def evaluate_code(state:State):
                     add a remark for betterment or appreciation (30 words limit.)
     """
     tool_prompt = "evaluate provided code"
-
+    generated_code=state.get("response").get("messages")[-1].get("content")
     # Add Chat item
     tool_chat = ChatCompletionUserMessageParam(role="user", content=tool_prompt)
     system_prompt_chat = ChatCompletionSystemMessageParam(role="system", content=system_prompt),
@@ -44,6 +44,9 @@ def evaluate_code(state:State):
     # manage parsed response
     parsedResponse=query_res.choices[0].message.parsed
     parsedResponse.type=EVALUATE_CODE
+    parsedResponse.node_id=state.get("node_data").get("node_graph_id")
+    parsedResponse.code=generated_code
+    
     meta=parsedResponse.model_dump()
 
 
@@ -63,5 +66,5 @@ def evaluate_code(state:State):
                 ]
     }
     state["response"] = response
-
+    state["ui_response"] = "Finished code evaluation."
     return state

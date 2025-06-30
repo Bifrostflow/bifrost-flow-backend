@@ -37,6 +37,9 @@ def code_documentation(state:State):
     # manage parsed response
     parsed_response = query_res.choices[0].message.parsed
     parsed_response.type = CODE_DOCUMENTATION
+    parsed_response.node_id=state.get("node_data").get("node_graph_id")
+    
+    state["ui_response"] = "Finished code documentation."
     if not parsed_response:
         return state
     meta = parsed_response.model_dump()
@@ -57,5 +60,4 @@ def code_documentation(state:State):
                 ]
     }
     state["response"] = response
-
-    return state
+    return state    
