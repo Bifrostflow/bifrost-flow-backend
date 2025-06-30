@@ -1,4 +1,4 @@
-from typing import List,Dict
+from typing import List,Dict, Optional
 
 from openai.types.chat import ChatCompletionAssistantMessageParam, ChatCompletionUserMessageParam
 from pydantic import BaseModel, Field
@@ -25,7 +25,7 @@ class UserEdge(TypedDict):
     id:str
     source:str
     target:str
-    tool_input:str|None
+    tool_input:Optional[str]|None
 
 class GraphData(BaseModel):
     data:List[UserEdge]
