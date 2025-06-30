@@ -41,9 +41,13 @@ async  def test():
     return {"test":"test"}
 
 @app.post("/run-flow")
-async def run_flow(data:GraphData):
-    print(data)
-    return await use_run_flow(data=data)
+async def run_flow(data:GraphData,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
+    jwks_url = os.getenv("JWKS")
+    jwks = requests.get(jwks_url).json()
+    try:
+        return await use_run_flow(jwks=jwks,token=credentials.credentials,data=data)
+    except SupabaseException as e:
+        return {"isSuccess": False, "message": "Something went wrong.","error":e}
 
 @app.post("/create-node")
 async def create_node(node_data:CreateNode):

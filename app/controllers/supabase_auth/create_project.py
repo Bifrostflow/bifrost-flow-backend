@@ -1,6 +1,4 @@
-from gotrue.helpers import model_dump
 from jose import jwt
-from pydantic import BaseModel
 from supabase import SupabaseException
 
 from app.controllers.supabase_auth.create_user import check_user_exist
@@ -67,7 +65,7 @@ def create_supabase_project(jwks:any,token:str,project:Project)->APIResponse:
             res=APIResponse(isSuccess=True,message="Project created Successfully.",data=response_flows.data,error=None)
             return res
         else:
-         res = APIResponse(isSuccess=False, message=f"User not exist", data=None, error=None)
+         res = APIResponse(isSuccess=False, message="User not exist", data=None, error=None)
          return res
     except SupabaseException as e:
          res = APIResponse(isSuccess=False, message=f"{e}", data=None, error=None)
@@ -94,7 +92,7 @@ def edit_supabase_project(jwks:any,token:str,project:EditProject)->APIResponse:
                 res=APIResponse(isSuccess=False,message="Failed to update.",data=None,error=None)
                 return res
         else:
-         res = APIResponse(isSuccess=False, message=f"User not exist", data=None, error=None)
+         res = APIResponse(isSuccess=False, message="User not exist", data=None, error=None)
          return res
     except SupabaseException as e:
          res = APIResponse(isSuccess=False, message=f"{e}", data=None, error=None)
