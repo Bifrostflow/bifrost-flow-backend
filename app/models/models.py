@@ -1,4 +1,4 @@
-from typing import List,Dict, Optional
+from typing import List, Optional
 
 from openai.types.chat import ChatCompletionAssistantMessageParam, ChatCompletionUserMessageParam
 from pydantic import BaseModel, Field
@@ -30,6 +30,7 @@ class UserEdge(TypedDict):
 class GraphData(BaseModel):
     data:List[UserEdge]
     input:str
+    flow_id:str
 
 class Node(TypedDict):
     id: str
@@ -50,10 +51,14 @@ class ResponseModel(BaseModel):
     type:str
     prefix:int
 
-class EvaluateCodeModel(BaseModel):
+class Meta(BaseModel):
+    node_id:str
+
+class EvaluateCodeModel(Meta):
     rating:int
     is_code:bool
     remark:str
+    code:str
     type:str
 
 class NodeData(TypedDict):
@@ -63,13 +68,14 @@ class NodeData(TypedDict):
 
 class State(TypedDict):
     response: Response
+    ui_response:str
     node_data:None | NodeData # node info only
 
 class ChatHistory(TypedDict):
     state: State
     tool_prompt:None|ChatCompletionUserMessageParam
 
-class CodeDocumentation(BaseModel):
+class CodeDocumentation(Meta):
     content:str
     file_name_without_extension:str
     response_message:str

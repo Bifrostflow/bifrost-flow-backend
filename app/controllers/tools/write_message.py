@@ -47,5 +47,5 @@ def write_message(state:State):
         "meta":state.get("response").get("meta")
     }
     state["response"] = response
-
+    state["ui_response"] = "Finished Writing message."
     return state

@@ -28,7 +28,7 @@ async def classify_message(state:State):
         next_node_steps_check += f"\n{prefixed_type}: {node.get("what_i_do")} and this `{node_id_prefix}` as prefix"
 
     system_prompt="""
-    You are a data classifier and your job isto get prompt and response data pattern `type` from user with `description` about that type
+    You are a data classifier and your job is to get prompt and response data pattern `type` from user with `description` about that type
     and return appropriate type.
     """
 
@@ -62,4 +62,5 @@ async def classify_message(state:State):
         "meta": state.get("response").get("meta")
     }
     state["response"] = response
+    state["ui_response"] = "I was thinking something..."
     return state

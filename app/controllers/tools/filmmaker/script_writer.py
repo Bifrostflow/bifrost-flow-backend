@@ -44,5 +44,5 @@ def script_writer(state:State):
         "meta":state.get("response").get("meta")
     }
     state["response"] = response
-
+    state["ui_response"] = "Finished writing script."
     return state
