@@ -68,7 +68,7 @@ async def test():
 
 @app.get("/system-tools")
 async def get_system_nodes():
-    return await use_get_system_nodes()
+    return use_get_system_nodes()
 
 
 @app.get("/system-tools/{node_id}")

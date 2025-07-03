@@ -1,10 +1,10 @@
-from app.db.mongo import node_collection
-from app.utils.utils import serialize_doc
+# from app.utils.utils import serialize_doc
+from app.db.jsonDB import tools_db
 
 
-async def use_get_system_nodes():
-    nodes_cursor = node_collection.find({})
+def use_get_system_nodes():
+    nodes_cursor = tools_db.get_by_state("active")
     nodes = []
-    async for node in nodes_cursor:
-        nodes.append(serialize_doc(node))
+    for node in nodes_cursor:
+        nodes.append(node)
     return nodes
