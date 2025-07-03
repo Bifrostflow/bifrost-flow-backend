@@ -1,7 +1,10 @@
 import os
 
 from dotenv import load_dotenv
-from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssistantMessageParam
+from openai.types.chat import (
+    ChatCompletionUserMessageParam,
+    ChatCompletionAssistantMessageParam,
+)
 from tavily import TavilyClient
 
 from app.models.models import State, Response
@@ -15,9 +18,11 @@ def tavily_search(state: State):
     # requires node input
     node_input = ""
     if state.get("node_data").get("node_input"):
-        node_input = state.get("node_data").get("node_input")  # input provided by user to node via UI
+        node_input = state.get("node_data").get(
+            "node_input"
+        )  # input provided by user to node via UI
     else:
-        node_input = messages[0].get("content")  #prompt
+        node_input = messages[0].get("content")  # prompt
 
     tavily_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
     search_response = tavily_client.search(node_input)
@@ -31,13 +36,15 @@ def tavily_search(state: State):
 
     user_request = ChatCompletionUserMessageParam(role="user", content=f"{node_input}")
     messages.append(user_request)
-    response_chat_data = ChatCompletionAssistantMessageParam(role="assistant", content=message)
+    response_chat_data = ChatCompletionAssistantMessageParam(
+        role="assistant", content=message
+    )
     messages.append(response_chat_data)
 
     response: Response = {
         "messages": messages,
         "type": state.get("response").get("type"),
-        "meta": state.get("response").get("meta")
+        "meta": state.get("response").get("meta"),
     }
     state["response"] = response
     print(state)
