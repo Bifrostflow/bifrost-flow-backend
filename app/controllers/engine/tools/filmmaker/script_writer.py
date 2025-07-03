@@ -4,8 +4,8 @@ from openai.types.chat import ChatCompletionUserMessageParam, ChatCompletionAssi
     ChatCompletionSystemMessageParam
 
 from app.models.models import State, Response
-from app.controllers.prompts.filmmaker.script_writer import script_writer_system_prompt, script_writer_tool_prompt
-from app.controllers.tools.tools_helpers.manage_messages import ChatHistory, manage_flow_chat_history
+from app.controllers.engine.prompts.filmmaker.script_writer import script_writer_system_prompt, script_writer_tool_prompt
+from app.controllers.engine.tools.tools_helpers.manage_messages import ChatHistory, manage_flow_chat_history
 
 def script_writer(state:State):
     print("🤖 --- doing write_message", state.get("node_data"))
