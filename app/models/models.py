@@ -42,8 +42,7 @@ class Node(TypedDict):
     node_input:str|None
 
 class Response(TypedDict):
-    messages:List[ChatCompletionUserMessageParam
-                 | ChatCompletionAssistantMessageParam]
+    messages:List[ChatCompletionUserMessageParam | ChatCompletionAssistantMessageParam]
     type:str|None
     meta:List[str]
 
