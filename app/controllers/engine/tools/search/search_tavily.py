@@ -1,12 +1,9 @@
-import os
-
 from dotenv import load_dotenv
 from openai.types.chat import (
     ChatCompletionUserMessageParam,
     ChatCompletionAssistantMessageParam,
 )
 from tavily import TavilyClient
-
 from app.models.models import State, Response
 
 
@@ -23,11 +20,8 @@ def tavily_search(state: State):
         )  # input provided by user to node via UI
     else:
         node_input = messages[0].get("content")  # prompt
-    try:
-        tavily_client = TavilyClient(api_key=state.get("api_keys").get("tavily"))
-    except Exception as e:
-        print("ERROR:---- ", e)
-        state["error"] = f"something went wrong with tavily {e}"
+    user_tavily_api_key = state.get("api_keys").get("tavily")
+    tavily_client = TavilyClient(api_key=user_tavily_api_key)
     search_response = tavily_client.search(node_input)
     print(search_response)
     results = search_response.get("results")[0:2]
