@@ -13,12 +13,12 @@ from app.controllers.engine.tools.search.search_tavily import tavily_search
 
 
 distribute = {
-    "conditional_routing": route_query,
-    "write_code": write_code,
-    "write_mail_and_send": send_mail,
-    "write_message": write_message,
     "classify_message": classify_message,
     "evaluate_code": evaluate_code,
+    "write_message": write_message,
+    "write_mail_and_send": send_mail,
+    "write_code": write_code,
+    "conditional_routing": route_query,
     "code_documentation": code_documentation,
     "doc_to_pdf": doc_to_pdf,
     "tavily_search": tavily_search,
