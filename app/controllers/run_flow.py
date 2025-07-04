@@ -49,11 +49,25 @@ async def use_run_flow(jwks: any, token: str, data: GraphData):
                 )
                 messages = [user_prompt]
                 response: Response = {"messages": messages, "type": None, "meta": []}
+                # fetch key from user
+                key_response = (
+                    super_supabase.table("flows")
+                    .select("api_keys")
+                    .eq("id", data.flow_id)
+                    .eq("user_id", user_id)
+                    .execute()
+                )
+                keys_data: dict[str, str] = json.loads(
+                    key_response.data[0].get("api_keys")
+                )
+                print("KEYS:: ", keys_data.get("tavily"))
                 _state: State = {
                     "response": response,
                     "node_data": None,
                     "ui_response": "Started Graph",
                     "flow_id": data.flow_id,
+                    "user_id": user_id,
+                    "api_keys": keys_data,
                 }
                 stream = stream_graph(graph, _state, flow_id=data.flow_id)
                 return StreamingResponse(stream, media_type="text/event-stream")
@@ -73,31 +87,45 @@ async def use_run_flow(jwks: any, token: str, data: GraphData):
 
 
 async def stream_graph(graph: CompiledStateGraph, state: State, flow_id: str):
-    result = graph.astream(state, stream_mode="updates")
-    async for chunk in result:
-        await asyncio.sleep(0.1)
-        chunked_state = [*chunk.values()][0]
-        response_data = chunked_state.get("response")
-        response_data_ui_message = chunked_state.get("ui_response")
-        meta_for_me = {}
-        for meta in chunked_state.get("response").get("meta"):
-            meta_json = json.loads(meta)
-            if meta_json.get("node_id") == chunked_state.get("node_data").get(
-                "node_graph_id"
-            ):
-                meta_for_me = meta_json
-                break
+    try:
+        result = graph.astream(state, stream_mode="updates")
+        async for chunk in result:
+            await asyncio.sleep(0.1)
+            chunked_state = [*chunk.values()][0]
+            response_data = chunked_state.get("response")
+            response_data_ui_message = chunked_state.get("ui_response")
+            meta_for_me = {}
+            for meta in chunked_state.get("response").get("meta"):
+                meta_json = json.loads(meta)
+                if meta_json.get("node_id") == chunked_state.get("node_data").get(
+                    "node_graph_id"
+                ):
+                    meta_for_me = meta_json
+                    break
 
-        chunk_data_response: Response = {
-            "messages": [],
-            "meta": meta_for_me,
-            "type": chunked_state.get("response").get("type"),
-        }
-        chunk_data_response["messages"] = response_data.get("messages")[-1]
+            chunk_data_response: Response = {
+                "messages": [],
+                "meta": meta_for_me,
+                "type": chunked_state.get("response").get("type"),
+            }
+            chunk_data_response["messages"] = response_data.get("messages")[-1]
+            chunk_data: State = {
+                "node_data": chunked_state.get("node_data"),
+                "response": chunk_data_response,
+                "ui_response": response_data_ui_message,
+                "flow_id": flow_id,
+                "user_id": state.get("user_id"),
+            }
+            yield f"data: {json.dumps(chunk_data)}\n\n"
+    except Exception as e:
+        error_message = "Something went wrong"
+        if e:
+            error_message = f"{e}"
+        print(e)
         chunk_data: State = {
-            "node_data": chunked_state.get("node_data"),
-            "response": chunk_data_response,
-            "ui_response": response_data_ui_message,
+            "ui_response": error_message,
             "flow_id": flow_id,
+            "user_id": state.get("user_id"),
+            "error": error_message,
         }
         yield f"data: {json.dumps(chunk_data)}\n\n"

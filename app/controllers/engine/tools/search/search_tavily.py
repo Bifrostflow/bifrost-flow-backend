@@ -23,8 +23,11 @@ def tavily_search(state: State):
         )  # input provided by user to node via UI
     else:
         node_input = messages[0].get("content")  # prompt
-
-    tavily_client = TavilyClient(api_key=os.getenv("TAVILY_API_KEY"))
+    try:
+        tavily_client = TavilyClient(api_key=state.get("api_keys").get("tavily"))
+    except Exception as e:
+        print("ERROR:---- ", e)
+        state["error"] = f"something went wrong with tavily {e}"
     search_response = tavily_client.search(node_input)
     print(search_response)
     results = search_response.get("results")[0:2]
