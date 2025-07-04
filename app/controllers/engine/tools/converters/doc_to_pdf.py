@@ -16,8 +16,6 @@ from app.controllers.engine.tools.tools_helpers.manage_messages import (
     manage_flow_chat_history,
 )
 from app.models.models import State, ChatHistory, Response
-
-
 from xhtml2pdf import pisa
 
 

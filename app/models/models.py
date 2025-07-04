@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List, Literal, Optional
 
 from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
@@ -28,6 +28,7 @@ class UserEdge(TypedDict):
     source: str
     target: str
     tool_input: Optional[str] | None
+    # input_type: Literal["none", "string", "url", "pdf", "image"] | None
 
 
 class GraphData(BaseModel):
@@ -79,6 +80,9 @@ class State(TypedDict):
     response: Response
     ui_response: str
     flow_id: str
+    user_id: str
+    api_keys: dict[str, str]
+    error: str
     node_data: None | NodeData  # node info only
 
 

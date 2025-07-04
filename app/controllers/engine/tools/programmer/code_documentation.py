@@ -1,4 +1,3 @@
-from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import (
     ChatCompletionUserMessageParam,
@@ -21,8 +20,9 @@ CODE_DOCUMENTATION = "code_documentation"
 
 def code_documentation(state: State):
     print("🤖 --- doing code_documentation", state.get("node_data"))
-    load_dotenv()
-    client = OpenAI()
+
+    user_openai_key = state.get("api_keys").get("openai")
+    client = OpenAI(api_key=user_openai_key)
 
     # Define prompts
     system_prompt = code_documentation_system_prompt

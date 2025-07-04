@@ -13,7 +13,11 @@ from pydantic import BaseModel
 import requests
 from supabase import SupabaseException
 
-from app.controllers.flow import load_nodes_controller, update_nodes_controller
+from app.controllers.flow import (
+    load_nodes_controller,
+    update_flow_keys_controller,
+    update_nodes_controller,
+)
 from app.controllers.get_system_node_by_id import use_get_system_node_by_id
 from app.controllers.get_system_nodes import use_get_system_nodes
 from app.controllers.run_flow import use_run_flow
@@ -29,7 +33,7 @@ from app.controllers.supabase_auth.create_user import (
     create_supabase_user,
     check_user_exist,
 )
-from app.models.projects import Project, EditProject, UpdateFlowGraph
+from app.models.projects import Project, EditProject, UpdateFlowGraph, UpdateFlowKeys
 
 # Use your Clerk JWKS endpoint
 clerk_config = ClerkConfig(jwks_url=os.getenv("JWKS"))
@@ -73,7 +77,7 @@ async def get_system_nodes():
 
 @app.get("/system-tools/{node_id}")
 async def get_system_node_by_id(node_id: str):
-    return await use_get_system_node_by_id(node_id=node_id)
+    return use_get_system_node_by_id(node_id=node_id)
 
 
 # USER
@@ -176,6 +180,14 @@ async def update_nodes(
     credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard),
 ):
     return await update_nodes_controller(flow_graph, credentials)
+
+
+@app.post("/update-flow-keys")
+async def update_flow_keys(
+    flow_keys: UpdateFlowKeys,
+    credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard),
+):
+    return await update_flow_keys_controller(flow_keys, credentials)
 
 
 @app.get("/load-nodes")
