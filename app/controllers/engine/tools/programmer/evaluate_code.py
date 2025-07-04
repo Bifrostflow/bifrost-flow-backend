@@ -1,6 +1,5 @@
 import json
 
-from dotenv import load_dotenv
 from openai import OpenAI
 from openai.types.chat import (
     ChatCompletionUserMessageParam,
@@ -18,15 +17,16 @@ EVALUATE_CODE = "evaluate_code"
 
 def evaluate_code(state: State):
     print("🤖 --- doing evaluate_code", state.get("node_data"))
-    load_dotenv()
-    client = OpenAI()
+
+    user_openai_key = state.get("api_keys").get("openai")
+    client = OpenAI(api_key=user_openai_key)
 
     #  Define prompts
     system_prompt = """
-              You are a Coding Expert Agent and your job is to 
-              1. Check if provided value is code
-              2. If not code send is_code as false else true and remark as 'no code provided by user'
-              3. If provided prompt is code, evaluate the code thoroughly rate it out out of 1-10 
+            You are a Coding Expert Agent and your job is to 
+            1. Check if provided value is code
+            2. If not code send is_code as false else true and remark as 'no code provided by user'
+            3. If provided prompt is code, evaluate the code thoroughly rate it out out of 1-10 
                     where 1 is lowest quality and 10 is highest quality
                     add a remark for betterment or appreciation (30 words limit.)
     """
