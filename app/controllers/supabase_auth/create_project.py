@@ -1,3 +1,4 @@
+from fastapi import HTTPException
 from jose import jwt
 from supabase import SupabaseException
 
@@ -267,6 +268,15 @@ def load_supabase_nodes(jwks: any, token: str, flow_id: str) -> APIResponse:
             )
             return res
         try:
+            response_nodes_for_user_id = (
+                super_supabase.table("flows")
+                .select("user_id")
+                .eq("id", flow_id)
+                .execute()
+            )
+            print(response_nodes_for_user_id, user_id)
+            if not response_nodes_for_user_id.data[0].get("user_id") == user_id:
+                raise HTTPException(status_code=403, detail="Unauthorized")
             response_nodes = (
                 super_supabase.table("flows")
                 .select("edges", "nodes", "api_keys")
@@ -274,13 +284,14 @@ def load_supabase_nodes(jwks: any, token: str, flow_id: str) -> APIResponse:
                 .eq("user_id", user_id)
                 .execute()
             )
-            print("response_nodes: ", response_nodes.data[0])
             if len(response_nodes.data) == 0:
                 res = APIResponse(
                     isSuccess=False, message="Failed to load.", data=[], error=None
                 )
                 return res
             else:
+                print("ALL GOOD")
+                print(response_nodes.data[0])
                 res = APIResponse(
                     isSuccess=True,
                     message="",
