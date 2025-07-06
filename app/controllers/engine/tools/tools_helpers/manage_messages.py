@@ -24,4 +24,6 @@ def manage_flow_chat_history(
     is_untouched_prompt = len(messages) == 1
     if data.get("tool_prompt") and not is_untouched_prompt:
         messages.append(data.get("tool_prompt"))
+    if data.get("user_prompt"):
+        messages.append(data.get("user_prompt"))
     return messages
