@@ -1,5 +1,4 @@
 import os
-from pathlib import Path
 
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
@@ -20,6 +19,7 @@ from app.controllers.flow import (
 )
 from app.controllers.get_system_node_by_id import use_get_system_node_by_id
 from app.controllers.get_system_nodes import use_get_system_nodes
+from app.controllers.get_templates import use_get_templates
 from app.controllers.run_flow import use_run_flow
 from app.controllers.supabase_auth.create_project import (
     create_supabase_project,
@@ -73,6 +73,11 @@ async def test():
 @app.get("/system-tools")
 async def get_system_nodes():
     return use_get_system_nodes()
+
+
+@app.get("/templates")
+async def get_templates():
+    return use_get_templates()
 
 
 @app.get("/system-tools/{node_id}")
