@@ -6,7 +6,8 @@ from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
     ChatCompletionSystemMessageParam,
 )
-from app.models.models import Response, State, EvaluateCodeModel
+from app.models.meta import EvaluateCodeModel
+from app.models.models import Response, State
 from app.controllers.engine.tools.tools_helpers.manage_messages import (
     ChatHistory,
     manage_flow_chat_history,

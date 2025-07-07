@@ -7,11 +7,10 @@ from openai.types.chat import (
     ChatCompletionSystemMessageParam,
 )
 
+from app.models.meta import TweetData
 from app.models.models import (
     State,
     Response,
-    TrendNews,
-    TweetData,
     TweetGenerationData,
 )
 from app.controllers.engine.tools.tools_helpers.manage_messages import (
@@ -53,7 +52,6 @@ def create_tweet(state: State):
         node_id=state.get("node_data").get("node_graph_id"),
         type="create_tweet",
         tweet="",
-        hashtag="",
         news_source="",
     )
     print("start 58")
@@ -67,10 +65,9 @@ def create_tweet(state: State):
             meta_json = json.loads(meta)
 
             if meta_json.get("type") == "google_trends":
-                google_trends_data = meta_json.get("result")
+                google_trends_data = meta_json
                 print(google_trends_data)
                 final_tweet.image = google_trends_data.get("image")
-                final_tweet.hashtag = google_trends_data.get("hashtag")
                 final_tweet.news_source = google_trends_data.get("news_source")
                 prompt = f"""
                 Mention this source in tweet: {google_trends_data.get("news_source_name")}
@@ -111,7 +108,7 @@ def create_tweet(state: State):
     chat_data = ChatHistory(state=state, tool_prompt=tool_chat)
     messages = manage_flow_chat_history(data=chat_data)
     query_response = client.beta.chat.completions.parse(
-        model="gpt-4.1-mini",
+        model="gpt-4.1",
         messages=[*system_prompt_chat, *messages],
         response_format=TweetGenerationData,
     )
@@ -131,7 +128,6 @@ def create_tweet(state: State):
         node_id=state.get("node_data").get("node_graph_id"),
         type="create_tweet",
         tweet=final_tweet.tweet,
-        hashtag=final_tweet.hashtag,
         news_source=final_tweet.news_source,
     )
     meta = meta_response.model_dump()
@@ -146,7 +142,7 @@ def create_tweet(state: State):
         "meta": [*state.get("response").get("meta"), json.dumps(meta)],
     }
     if final_tweet.tweet:
-        url = f"https://twitter.com/intent/tweet?text={final_tweet.tweet}&size=large&url={final_tweet.news_source}"
+        url = f"https://twitter.com/intent/tweet?text={final_tweet.tweet}&size=large"
         webbrowser.open(url)
     print("creating response end")
     # create response end

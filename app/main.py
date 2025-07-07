@@ -19,7 +19,7 @@ from app.controllers.flow import (
 )
 from app.controllers.get_system_node_by_id import use_get_system_node_by_id
 from app.controllers.get_system_nodes import use_get_system_nodes
-from app.controllers.get_templates import use_get_templates
+from app.controllers.get_templates import use_get_template_by_id, use_get_templates
 from app.controllers.run_flow import use_run_flow
 from app.controllers.supabase_auth.create_project import (
     create_supabase_project,
@@ -28,6 +28,7 @@ from app.controllers.supabase_auth.create_project import (
     get_supabase_project,
     edit_supabase_project,
 )
+from app.controllers.supabase_auth.try_template import use_try_template
 from app.models.models import GraphData
 from app.controllers.supabase_auth.create_user import (
     create_supabase_user,
@@ -65,19 +66,18 @@ async def test():
     return {"test": "test"}
 
 
-# @app.post("/create-node")
-# async def create_node(node_data:CreateNode):
-#     return await use_create_node(node_data)
-
-
 @app.get("/system-tools")
 async def get_system_nodes():
     return use_get_system_nodes()
 
-
 @app.get("/templates")
-async def get_templates():
+async def get_templates(credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
     return use_get_templates()
+
+@app.get("/template")
+async def get_templates(template_id: str,
+    credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
+    return use_get_template_by_id(template_id)
 
 
 @app.get("/system-tools/{node_id}")
@@ -212,5 +212,17 @@ async def run_flow(
     jwks = requests.get(jwks_url).json()
     try:
         return await use_run_flow(jwks=jwks, token=credentials.credentials, data=data)
+    except SupabaseException as e:
+        return {"isSuccess": False, "message": "Something went wrong.", "error": e}
+
+@app.get("/try-template")
+async def try_template(
+    template_id: str,
+    credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard),
+):
+    jwks_url = os.getenv("JWKS")
+    jwks = requests.get(jwks_url).json()
+    try:
+        return use_try_template(jwks=jwks, token=credentials.credentials, template_id=template_id)
     except SupabaseException as e:
         return {"isSuccess": False, "message": "Something went wrong.", "error": e}

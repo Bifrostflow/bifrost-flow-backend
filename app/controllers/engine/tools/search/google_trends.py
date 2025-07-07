@@ -6,20 +6,25 @@ from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
 )
 import requests
-from app.models.models import State, Response, TrendData, TrendNews
+from app.models.meta import TrendData
+from app.models.models import State, Response, TrendNews
+
+GOOGLE_TRENDS = "google_trends"
 
 
 async def get_html(path: str):
     url = path
+    try:
+        response = requests.get(url)
+        if response.status_code != 200:
+            print(url)
+            raise Exception("Network response was not ok")
 
-    response = requests.get(url)
-    if response.status_code != 200:
-        print(url)
-        raise Exception("Network response was not ok")
-
-    html = response.text
-    soup = BeautifulSoup(html, "html.parser")
-    return soup
+        html = response.text
+        soup = BeautifulSoup(html, "html.parser")
+        return soup
+    except Exception:
+        return None
 
 
 async def get_rss(url: str):
@@ -47,17 +52,21 @@ async def google_trend(state: State):
         "news_source_name": top_news_item("ht_news_item_source"),
         "hashtag": f"#{"_".join(f"{top_news_item("title")}".split())}",
     }
+    print("-----here")
     source_html = await get_html(top_news.get("news_source"))
-    description_body = source_html.find("body")
-    description_list = description_body.find_all("p")
+    if source_html:
+        print(source_html)
+        description_body = source_html.find("body")
+        description_list = description_body.find_all("p")
 
-    description = ""
-    for desc in description_list:
-        description += f"\n\n{ desc.get_text()}"
-    print(description)
-    top_news["description"] = description
-
-    searchable_query = f"i need for info on this topic {top_news.get("title")}"
+        description = ""
+        for desc in description_list:
+            description += f"\n\n{ desc.get_text()}"
+        print("description: ", description)
+        top_news["description"] = description
+    else:
+        top_news["description"] = top_news.get("title")
+    searchable_query = f"i need info on this topic {top_news.get("title")}"
     message = f"Here is top trend found `{top_news.get("title")}`"
 
     # scrapping end
@@ -75,8 +84,14 @@ async def google_trend(state: State):
     meta_response = TrendData(
         searchable_query=searchable_query,
         node_id=state.get("node_data").get("node_graph_id"),
-        result=top_news,
         type="google_trends",
+        description=top_news.get("description"),
+        hashtag=top_news.get("hashtag"),
+        image=top_news.get("image"),
+        image_source=top_news.get("image_source"),
+        news_source=top_news.get("news_source"),
+        news_source_name=top_news.get("news_source_name"),
+        title=top_news.get("title"),
     )
     meta = meta_response.model_dump()
     # create meta end

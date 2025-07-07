@@ -58,18 +58,6 @@ class ResponseModel(BaseModel):
     prefix: int
 
 
-class Meta(BaseModel):
-    node_id: str
-    type: str
-
-
-class EvaluateCodeModel(Meta):
-    rating: int
-    is_code: bool
-    remark: str
-    code: str
-
-
 class NodeData(TypedDict):
     node_graph_id: str
     node_input: str | None
@@ -92,16 +80,6 @@ class ChatHistory(TypedDict):
     user_prompt: None | ChatCompletionUserMessageParam
 
 
-class CodeDocumentation(Meta):
-    content: str
-    file_name_without_extension: str
-    response_message: str
-
-
-class SearchableMeta(Meta):
-    searchable_query: str
-
-
 class TrendNews(TypedDict):
     title: str
     hashtag: str
@@ -112,22 +90,11 @@ class TrendNews(TypedDict):
     description: str
 
 
-class TrendData(SearchableMeta):
-    result: TrendNews
-
-
 class TweetGenerationData(BaseModel):
     tweet: str
 
 
-class TweetData(Meta):
-    tweet: str
-    image: str | None
-    hashtag: str | None
-    news_source: str | None
-
-
-#     title-> title
+# title-> title
 # hashtag-> title with _
 # image-> ht_news_item_picture
 # image_source-> ht_news_item_source

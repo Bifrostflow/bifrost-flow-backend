@@ -5,7 +5,8 @@ from openai.types.chat import (
     ChatCompletionSystemMessageParam,
 )
 import json
-from app.models.models import State, Response, CodeDocumentation
+from app.models.meta import CodeDocumentation
+from app.models.models import State, Response
 from app.controllers.engine.prompts.programmer.code_documentation import (
     code_documentation_system_prompt,
     code_documentation_tool_prompt,
