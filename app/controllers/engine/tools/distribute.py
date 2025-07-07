@@ -8,8 +8,10 @@ from app.controllers.engine.tools.programmer.code_documentation import (
 )
 from app.controllers.engine.tools.programmer.evaluate_code import evaluate_code
 from app.controllers.engine.tools.programmer.write_code import write_code
+from app.controllers.engine.tools.search.google_trends import google_trend
 from app.controllers.engine.tools.write_message import write_message
 from app.controllers.engine.tools.search.search_tavily import tavily_search
+from app.controllers.engine.tools.create_tweet import create_tweet
 
 
 distribute = {
@@ -23,4 +25,6 @@ distribute = {
     "doc_to_pdf": doc_to_pdf,
     "tavily_search": tavily_search,
     "script_writer": script_writer,
+    "google_trend": google_trend,
+    "create_tweet": create_tweet,
 }

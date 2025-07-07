@@ -57,9 +57,11 @@ async def use_run_flow(jwks: any, token: str, data: GraphData):
                     .eq("user_id", user_id)
                     .execute()
                 )
-                keys_data: dict[str, str] = json.loads(
-                    key_response.data[0].get("api_keys")
-                )
+                keys_data = {}
+                if key_response.data[0].get("api_keys"):
+                    keys_data: dict[str, str] = json.loads(
+                        key_response.data[0].get("api_keys")
+                    )
                 _state: State = {
                     "response": response,
                     "node_data": None,

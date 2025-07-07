@@ -1,6 +1,5 @@
 from collections import defaultdict
 from typing import List
-from bson import ObjectId
 from langgraph.constants import START, END
 from langgraph.graph import StateGraph
 from langgraph.graph.state import CompiledStateGraph
@@ -107,9 +106,10 @@ async def create_graph(nodes: List[Node]) -> CompiledStateGraph:
     classify_count_edge = 0
     for node in nodes:
         req: Node = node
+        print("===>", req)
         node_type = req.get("node_type")
 
-        is_start = node_type == "on_prompt"
+        is_start = node_type == "on_prompt" or node_type == "on_start"
         is_conditional = req.get("flow_type") == "conditional"
         next_edge_graph_id = node.get("next_node_id")[0]
         next_edge_db_id = next_edge_graph_id.split("-")[1]

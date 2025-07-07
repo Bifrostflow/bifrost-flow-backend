@@ -19,11 +19,11 @@ def write_message(state: State):
 
     #  Define prompts
     system_prompt = """
-                   You are an agent which generates messages/text based on user prompt.
-                   You will not generate code or any data which is not general text or simple user prompt.
-                   you can help the summarize things like blogs, codes, documentation, news, articles, etc.
-                   Refuse to generate without enough context 
-                   """
+                You are an agent which generates messages/text based on user prompt.
+                You will not generate code or any data which is not general text or simple user prompt.
+                you can help the summarize things like blogs, codes, documentation, news, articles, etc.
+                Refuse to generate without enough context 
+                """
     tool_prompt = "write message based on provided response"
 
     # Add Chat item

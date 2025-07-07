@@ -3,19 +3,16 @@ import time
 from typing import Literal
 import json
 
-from openai.types.chat import (
-    ChatCompletionUserMessageParam,
-    ChatCompletionAssistantMessageParam,
-)
+
+from supabase import SupabaseException
 
 from app.controllers.engine.tools.programmer.code_documentation import (
     CODE_DOCUMENTATION,
 )
 from app.controllers.engine.tools.save.save_to_flow_bucket import save_to_storage
-from app.controllers.engine.tools.tools_helpers.manage_messages import (
-    manage_flow_chat_history,
-)
-from app.models.models import State, ChatHistory, Response
+from app.controllers.engine.tools.search.google_trends import GOOGLE_TRENDS
+
+from app.models.models import State, Response
 from xhtml2pdf import pisa
 
 
@@ -40,65 +37,48 @@ async def doc_to_pdf(state: State):
     print("🤖 --- doing doc_to_pdf", state.get("node_data"))
     # code_documentation
     # check if it has incoming documents
-    meta = state.get("response").get("meta")
-    if len(meta) > 0:
-        # return state
-        for item in meta:
-            # load documents to json
-            json_data = json.loads(item)
-            if json_data.get("type") == CODE_DOCUMENTATION:
-                content = json_data.get("content")
-                file_name_without_extension = (
-                    f"{json_data.get("file_name_without_extension")}_{time.time()}"
-                )
-                # write pdf to local_temp
-                # upload pdf to remote
-                filename = convert_to_pdf(
-                    content_type="html",
-                    flow_id=state.get("flow_id"),
-                    output_path=file_name_without_extension,
-                    content=content,
-                )
-                await manage_file_store(file_name=filename, state=state)
-        state["ui_response"] = "Added to queue"
-        return state
+    meta_list = state.get("response").get("meta")
+    filename = ""
+    content = ""
+    # check if content in meta
+    if len(meta_list) > 0:
+        for meta_string in meta_list:
+            if not content:
+                meta_data = json.loads(meta_string)
+                meta_data_type = meta_data.get("type")
+                if meta_data_type == CODE_DOCUMENTATION:
+                    content = meta_data.get("content")
+                    filename = (
+                        f"{meta_data.get("file_name_without_extension")}_{time.time()}"
+                    )
+                    state["ui_response"] = "Document successfully generated."
+                if meta_data_type == GOOGLE_TRENDS:
+                    content = meta_data.get("description")
+                    filename = f"{time.time_ns()}"
+                    state["ui_response"] = "Document successfully generated."
     else:
-        tool_chat = ChatCompletionUserMessageParam(role="user", content="")
-
-        # Create chat data
-        chat_data = ChatHistory(state=state, tool_prompt=tool_chat)
-        messages = manage_flow_chat_history(data=chat_data)
+        messages = state.get("response").get("messages")[-1].get("content")
         content = messages[0].get("content")
-        filename = convert_to_pdf(
-            flow_id=state.get("flow_id"),
-            content=content,
-            content_type="html",
-            output_path=f"{time.time()}",
-        )
-        if filename:
-            # save to selected storage
-            await manage_file_store(file_name=filename, state=state)
-            response_chat_data = ChatCompletionAssistantMessageParam(
-                role="assistant", content="Document successfully generated."
-            )
-            messages.append(response_chat_data)
-            response: Response = {
-                "type": state.get("response").get("type"),
-                "messages": messages,
-                "meta": state.get("response").get("meta"),
-            }
-            state["response"] = response
-            state["ui_response"] = "Document successfully generated."
-            return state
-        else:
-            response: Response = {
-                "type": state.get("response").get("type"),
-                "messages": messages,
-                "meta": state.get("response").get("meta"),
-            }
-            state["response"] = response
-            state["ui_response"] = "Failed to generate."
-            return state
+        filename = f"{time.time_ns()}"
+        state["ui_response"] = "Document successfully generated."
+    response_filename = convert_to_pdf(
+        content_type="html",
+        flow_id=state.get("flow_id"),
+        output_path=filename,
+        content=content,
+    )
+    try:
+        await manage_file_store(file_name=response_filename, state=state)
+    except SupabaseException as error:
+        print(error)
+        state["ui_response"] = "Failed to generate document"
+    response: Response = {
+        "type": "show-documents",
+        "messages": state.get("response").get("messages"),
+        "meta": state.get("response").get("meta"),
+    }
+    state["response"] = response
+    return state
 
 
 def convert_to_pdf(
@@ -109,7 +89,7 @@ def convert_to_pdf(
 ) -> str:
     # Convert markdown to HTML if needed
     if content_type.lower() == "markdown":
-        html_content = f"""<div markdown="1" >
+        html_content = f"""<div markdown="1" style="font-size:18px" >
         
         {content}
         
@@ -134,7 +114,13 @@ def convert_to_pdf(
 
 
 def convert_html_to_pdf(source_html, output_filename):
+    # with open("style.css") as css_file:
+    #     css_content = css_file.read()
     with open(output_filename, "w+b") as result_file:
-        pisa_status = pisa.CreatePDF(src=source_html, dest=result_file)
+        pisa_status = pisa.CreatePDF(
+            # src=source_html, dest=result_file, default_css=css_content
+            src=source_html,
+            dest=result_file,
+        )
         print("pisa_status ", pisa_status)
     return pisa_status.err == 0
