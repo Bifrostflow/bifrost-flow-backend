@@ -1,3 +1,4 @@
+import collections
 from datetime import datetime, timezone
 from fastapi import HTTPException
 from jose import jwt
@@ -15,7 +16,19 @@ from app.models.projects import (
     UpdateFlowKeys,
 )
 from app.models.response import APIResponse
+from app.utils import fallback_snap
+from app.utils.projct_name_genrator import generate_norse_project_name
 
+def subscription_plan_limit(plan: str) -> int:
+    """
+    Returns the project limit based on the user's subscription plan.
+    """
+    plan_limits = {
+        "mortal": 5,
+        "demigod": 20,
+        "deity": 50
+    }
+    return plan_limits.get(plan, 0)  # Default to 0 if plan is not recognized
 
 def create_supabase_project(jwks: any, token: str, project: Project) -> APIResponse:
     try:
@@ -29,24 +42,54 @@ def create_supabase_project(jwks: any, token: str, project: Project) -> APIRespo
         exist = check_user_exist(jwks, token)
         print(exist.isExist)
         if exist.isExist:
+            # Check if the user has reached their project limit
+            user_data = (
+                super_supabase.table("users")
+                .select("user_plan")
+                .eq("clerk_id", user_id)
+                .execute()
+            )
+            plan = user_data.data[0].get("user_plan")
+            project_limit = subscription_plan_limit(plan)
+            current_project_count = len((
+                super_supabase.table("flows")
+                .select("id")
+                .eq("user_id", user_id)
+                .execute()
+            ).data)
+            print("Current project count:", current_project_count)
+            if current_project_count >= project_limit:
+                res = APIResponse(
+                    isSuccess=False,
+                    message=f"Project limit reached. You can only have {project_limit} projects.",
+                    data=None,
+                    error=None,
+                )
+                return res
+            
             project.user_id = user_id
             try:
                 collaborator_data = CollaboratorInfo(
                     role="owner", uid=user_id
                 ).model_dump()
                 users = CollaboratorUsersInfo(data=[collaborator_data])
-
+                # upload flow snap
+                # Initialize nodes, edges, and api_keys as empty strings
                 project.users = users.model_dump_json()
                 project.nodes = ""
                 project.edges = ""
                 project.api_keys = ""
-
+                project.name=generate_norse_project_name()
+                project.description=""
                 response_flows = (
                     super_supabase.table("flows").insert(project.model_dump()).execute()
                 )
                 flow_id = response_flows.data[0].get("id")
-
-                print(flow_id)
+                # If the flow snap is provided, upload it
+                snap_path = upload_flow_snap(flow_id, fallback_snap.fallback)
+                if snap_path:
+                    # Update the flow with the snap path
+                    super_supabase.table("flows").update({"snap_path": snap_path}).eq("id", flow_id).execute()
                 res = APIResponse(
                     isSuccess=True,
                     message="Project created Successfully.",
@@ -233,6 +276,19 @@ def get_supabase_project(jwks: any, token: str, flow_id: str) -> APIResponse:
         res = APIResponse(isSuccess=False, message=f"{e}", data=None, error=None)
         return res
 
+def upload_flow_snap(flow_id:str,snap_string:str):
+    try:
+        bucket_path=f"{flow_id}.png"
+        base64=snap_string.split("base64,")[1]
+        buffer=Base64Encoder.decode(base64)
+        flow_data_bucket=super_supabase.storage.from_("flow-snaps").upload(path=bucket_path,file=buffer,file_options={"cache-control": "3600", "upsert": "true","content-type":"image/png"})
+        print(flow_data_bucket)
+        return flow_data_bucket.path
+    except SupabaseException as e:
+        print(e)
+        return None
+    
+
 
 def update_supabase_nodes(
     jwks: any, token: str, flow_graph: UpdateFlowGraph
@@ -248,15 +304,11 @@ def update_supabase_nodes(
         exist = check_user_exist(jwks, token)
         if exist.isExist:
             try:
-                bucket_path=f"{flow_graph.flow_id}.png"
-                base64=flow_graph.snap.split("base64,")[1]
-                buffer=Base64Encoder.decode(base64)
-                flow_data_bucket=super_supabase.storage.from_("flow-snaps").upload(path=bucket_path,file=buffer,file_options={"cache-control": "3600", "upsert": "true","content-type":"image/png"})
-                print(flow_data_bucket)
+                flow_data_bucket_path=upload_flow_snap(flow_graph.flow_id,flow_graph.snap)
                 now = datetime.now(timezone.utc)
                 response = (
                     super_supabase.table("flows")
-                    .update({"edges": flow_graph.edges, "nodes": flow_graph.nodes,"updated_at":now.isoformat(sep=' ', timespec='microseconds'),"snap_path":flow_data_bucket.path})
+                    .update({"edges": flow_graph.edges, "nodes": flow_graph.nodes,"updated_at":now.isoformat(sep=' ', timespec='microseconds'),"snap_path":flow_data_bucket_path})
                     .eq("id", flow_graph.flow_id)
                     .eq("user_id", user_id)
                     .execute()
