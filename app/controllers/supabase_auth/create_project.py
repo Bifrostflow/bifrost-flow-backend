@@ -229,7 +229,7 @@ def get_supabase_projects(jwks: any, token: str) -> APIResponse:
         data = (
             super_supabase.table("flows")
             .select("name", "description", "updated_at", "id","snap_path")
-            .eq("user_id", user_id)
+            .eq("user_id", user_id).order("updated_at", desc=True)  
             .execute()
         )
         new_data=[]

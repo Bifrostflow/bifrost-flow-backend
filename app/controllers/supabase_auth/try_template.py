@@ -12,6 +12,8 @@ from app.models.projects import (
 )
 from app.models.response import APIResponse
 from app.db.template_data import template_db
+from app.controllers.supabase_auth.create_project import subscription_plan_limit, upload_flow_snap
+from app.utils import fallback_snap
 
 
 def use_try_template(jwks: any, token: str, template_id: str) -> APIResponse:
@@ -26,9 +28,33 @@ def use_try_template(jwks: any, token: str, template_id: str) -> APIResponse:
         exist = check_user_exist(jwks, token)
         print(exist.isExist)
         if exist.isExist:
+             # Check if the user has reached their project limit
+            user_data = (
+                super_supabase.table("users")
+                .select("user_plan")
+                .eq("clerk_id", user_id)
+                .execute()
+            )
+            plan = user_data.data[0].get("user_plan")
+            project_limit = subscription_plan_limit(plan)
+            current_project_count = len((
+                super_supabase.table("flows")
+                .select("id")
+                .eq("user_id", user_id)
+                .execute()
+            ).data)
+            print("Current project count:", current_project_count)
+            if current_project_count >= project_limit:
+                res = APIResponse(
+                    isSuccess=False,
+                    message=f"Project limit reached. You can only have {project_limit} projects.",
+                    data=None,
+                    error=None,
+                )
+                return res
             template=template_db.get_by_id(template_id)
             print("description:: ",template.description)
-            project=Project(description=template.description,name=f"My {template.name}",users="",user_id=user_id,api_keys="{}",edges="",nodes="")
+            project=Project(description=template.description,name=f"My {template.name}",users="",user_id=user_id,api_keys="{}",edges="",nodes="", snap_path="")
             try:
                 collaborator_data = CollaboratorInfo(
                     role="owner", uid=user_id
@@ -40,12 +66,17 @@ def use_try_template(jwks: any, token: str, template_id: str) -> APIResponse:
                 project.nodes = template.graph.nodes
                 project.edges = template.graph.edges
                 project.api_keys = ""
+                project.snap_path = ""
+
 
                 response_flows = (
                     super_supabase.table("flows").insert(project.model_dump()).execute()
                 )
                 flow_id = response_flows.data[0].get("id")
-
+                snap_path = upload_flow_snap(flow_id, fallback_snap.fallback)
+                if snap_path:
+                    # Update the flow with the snap path
+                    super_supabase.table("flows").update({"snap_path": snap_path}).eq("id", flow_id).execute()
                 print(flow_id)
                 res = APIResponse(
                     isSuccess=True,

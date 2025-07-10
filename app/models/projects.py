@@ -11,6 +11,7 @@ class Project(BaseModel):
     edges: Optional[str] | None
     nodes: Optional[str] | None
     api_keys: Optional[str] | None
+    snap_path: Optional[str] | None
 
 
 class EditProject(BaseModel):
