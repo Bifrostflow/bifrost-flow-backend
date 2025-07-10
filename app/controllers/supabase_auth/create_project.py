@@ -1,5 +1,7 @@
+from datetime import datetime, timezone
 from fastapi import HTTPException
 from jose import jwt
+from pydantic import Base64Encoder
 from supabase import SupabaseException
 
 from app.controllers.supabase_auth.create_user import check_user_exist
@@ -169,13 +171,40 @@ def get_supabase_projects(jwks: any, token: str) -> APIResponse:
                 isSuccess=False, message="Authorization failed.", data=None, error=None
             )
             return res
+        user_data = (
+            super_supabase.table("users").select("user_plan").eq("clerk_id", user_id).execute()
+        )
+        plan=user_data.data[0].get("user_plan")
+        project_limit=0
+        if plan=="mortal":
+            project_limit=5
+        elif plan=="demigod":
+            project_limit=20
+        elif plan=="deity":
+            project_limit=50
+        
         data = (
             super_supabase.table("flows")
-            .select("name", "description", "created_at", "id")
+            .select("name", "description", "updated_at", "id","snap_path")
             .eq("user_id", user_id)
             .execute()
         )
-        res = APIResponse(isSuccess=True, message="", data=data.data, error=None)
+        new_data=[]
+        for item in data.data:
+            new_item=item
+            if new_item.get("snap_path"):
+                new_item_image_url=super_supabase.storage.from_("flow-snaps").get_public_url(new_item.get("snap_path"))
+                new_item["snap_path"]=new_item_image_url
+            else:
+                new_item["snap_path"]=""
+            print(new_item)
+            new_data.append(new_item)
+        response_data={
+            "projects": new_data,
+            "project_limit": project_limit,
+            "current_project_count": len(new_data)
+        }
+        res = APIResponse(isSuccess=True, message="", data=response_data, error=None)
         return res
     except SupabaseException as e:
         res = APIResponse(isSuccess=False, message=f"{e}", data=None, error=None)
@@ -219,9 +248,15 @@ def update_supabase_nodes(
         exist = check_user_exist(jwks, token)
         if exist.isExist:
             try:
+                bucket_path=f"{flow_graph.flow_id}.png"
+                base64=flow_graph.snap.split("base64,")[1]
+                buffer=Base64Encoder.decode(base64)
+                flow_data_bucket=super_supabase.storage.from_("flow-snaps").upload(path=bucket_path,file=buffer,file_options={"cache-control": "3600", "upsert": "true","content-type":"image/png"})
+                print(flow_data_bucket)
+                now = datetime.now(timezone.utc)
                 response = (
                     super_supabase.table("flows")
-                    .update({"edges": flow_graph.edges, "nodes": flow_graph.nodes})
+                    .update({"edges": flow_graph.edges, "nodes": flow_graph.nodes,"updated_at":now.isoformat(sep=' ', timespec='microseconds'),"snap_path":flow_data_bucket.path})
                     .eq("id", flow_graph.flow_id)
                     .eq("user_id", user_id)
                     .execute()

@@ -1,6 +1,6 @@
 from typing import Optional, Literal
 
-from pydantic import BaseModel
+from pydantic import Base64Encoder, BaseModel
 
 
 class Project(BaseModel):
@@ -32,6 +32,7 @@ class UpdateFlowGraph(BaseModel):
     nodes: str
     edges: str
     flow_id: str
+    snap:str
 
 
 class APIKey(BaseModel):
