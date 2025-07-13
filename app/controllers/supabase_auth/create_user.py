@@ -41,7 +41,7 @@ def get_supabase_user(jwks:any,token:str)->APIResponse:
         return res
     try:
         response = super_supabase.table("users").select("*").eq("clerk_id",user_id).execute()
-        print("RES ",response.data[0])
+        # print("RES44 ",response.data[0])
         res = APIResponse(isSuccess=True, message="fetched", data=response.data[0], error=None)
         return res
     except SupabaseException as e:
@@ -59,15 +59,16 @@ def check_user_exist(jwks:any,token:str)->UserExistResponse:
             res=UserExistResponse(isExist=False)
             return res
     except SupabaseException as e:
-        print(e)
+        # print(e)
         res = UserExistResponse(isExist=False)
         return res
     try:
         response = super_supabase.table("users").select("clerk_id").eq("clerk_id",user_id).execute()
-        print("RES ",response.data)
+        # print("RES ",response.data)
         res = UserExistResponse(isExist=len(response.data)==1)
+        # print("",res)
         return res
     except SupabaseException as e:
-        print(e)
+        # print(e)
         res = UserExistResponse(isExist=False)
         return res
