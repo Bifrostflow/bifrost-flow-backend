@@ -1,4 +1,3 @@
-import collections
 from datetime import datetime, timezone
 import webbrowser
 from fastapi import HTTPException
@@ -41,7 +40,7 @@ def create_supabase_project(jwks: any, token: str, project: Project) -> APIRespo
             )
             return res
         exist = check_user_exist(jwks, token)
-        print(exist.isExist)
+        # print(exist.isExist)
         if exist.isExist:
             # Check if the user has reached their project limit
             user_data = (
@@ -58,7 +57,7 @@ def create_supabase_project(jwks: any, token: str, project: Project) -> APIRespo
                 .eq("user_id", user_id)
                 .execute()
             ).data)
-            print("Current project count:", current_project_count)
+            # print("Current project count:", current_project_count)
             if current_project_count >= project_limit:
                 res = APIResponse(
                     isSuccess=False,
@@ -99,8 +98,8 @@ def create_supabase_project(jwks: any, token: str, project: Project) -> APIRespo
                 )
                 return res
             except SupabaseException as e:
-                print("in flow create")
-                print(e)
+                # print("in flow create")
+                # print(e)
                 res = APIResponse(
                     isSuccess=False,
                     message="Project creation failed.",
@@ -145,9 +144,9 @@ def edit_supabase_project(jwks: any, token: str, project: EditProject) -> APIRes
                 )
                 return res
             except SupabaseException as e:
-                print("in flows")
-                print(e)
-                print(e.message)
+                # print("in flows")
+                # print(e)
+                # print(e.message)
                 res = APIResponse(
                     isSuccess=False, message="Failed to update.", data=None, error=None
                 )
@@ -172,7 +171,7 @@ def delete_supabase_project(jwks: any, token: str, flow_id: str) -> APIResponse:
             )
             return res
         exist = check_user_exist(jwks, token)
-        print(exist.isExist)
+        # print(exist.isExist)
         if exist.isExist:
             try:
                 super_supabase.table("flows").delete().eq("id", flow_id).eq(
@@ -186,9 +185,9 @@ def delete_supabase_project(jwks: any, token: str, flow_id: str) -> APIResponse:
                 )
                 return res
             except SupabaseException as e:
-                print("in flows")
-                print(e)
-                print(e.message)
+                # print("in flows")
+                # print(e)
+                # print(e.message)
                 res = APIResponse(
                     isSuccess=False,
                     message="Project deletion failed.",
@@ -241,7 +240,7 @@ def get_supabase_projects(jwks: any, token: str) -> APIResponse:
                 new_item["snap_path"]=new_item_image_url
             else:
                 new_item["snap_path"]=""
-            print(new_item)
+            # print(new_item)
             new_data.append(new_item)
         response_data={
             "projects": new_data,
@@ -283,10 +282,10 @@ def upload_flow_snap(flow_id:str,snap_string:str):
         base64=snap_string.split("base64,")[1]
         buffer=Base64Encoder.decode(base64)
         flow_data_bucket=super_supabase.storage.from_("flow-snaps").upload(path=bucket_path,file=buffer,file_options={"cache-control": "3600", "upsert": "true","content-type":"image/png"})
-        print(flow_data_bucket)
+        # print(flow_data_bucket)
         return flow_data_bucket.path
     except SupabaseException as e:
-        print(e)
+        # print(e)
         return None
     
 
@@ -331,7 +330,7 @@ def update_supabase_nodes(
                     )
                     return res
             except SupabaseException as e:
-                print(e)
+                # print(e)
                 res = APIResponse(
                     isSuccess=False, message="Failed to update.", data=None, error=None
                 )
@@ -362,7 +361,7 @@ def load_supabase_nodes(jwks: any, token: str, flow_id: str) -> APIResponse:
                 .eq("id", flow_id)
                 .execute()
             )
-            print(response_nodes_for_user_id, user_id)
+            # print(response_nodes_for_user_id, user_id)
             if not response_nodes_for_user_id.data[0].get("user_id") == user_id:
                 raise HTTPException(status_code=403, detail="Unauthorized")
             response_nodes = (
@@ -378,8 +377,8 @@ def load_supabase_nodes(jwks: any, token: str, flow_id: str) -> APIResponse:
                 )
                 return res
             else:
-                print("ALL GOOD")
-                print(response_nodes.data[0])
+                # print("ALL GOOD")
+                # print(response_nodes.data[0])
                 res = APIResponse(
                     isSuccess=True,
                     message="",
@@ -388,7 +387,7 @@ def load_supabase_nodes(jwks: any, token: str, flow_id: str) -> APIResponse:
                 )
                 return res
         except SupabaseException as e:
-            print(e)
+            # print(e)
             res = APIResponse(
                 isSuccess=False, message="Failed to load.", data=None, error=None
             )
@@ -431,7 +430,7 @@ def update_supabase_flow_keys(
                 )
                 return res
         except SupabaseException as e:
-            print(e)
+            # print(e)
             res = APIResponse(
                 isSuccess=False, message="Failed to update.", data=None, error=None
             )
@@ -463,7 +462,7 @@ def get_supabase_flow_docs(
                 )
             return res
         except SupabaseException as e:
-            print(e)
+            # print(e)
             res = APIResponse(
                 isSuccess=False, message="Failed to get data.", data=None, error=None
             )
@@ -496,7 +495,7 @@ def open_supabase_flow_doc(
                 )
             return res
         except SupabaseException as e:
-            print(e)
+            # print(e)
             res = APIResponse(
                 isSuccess=False, message="Failed to get data.", data=None, error=None
             )

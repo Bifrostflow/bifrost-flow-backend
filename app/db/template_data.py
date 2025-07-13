@@ -1,3 +1,4 @@
+import uuid
 from pydantic import BaseModel
 from typing import List, Optional, Literal
 from typing import Dict
@@ -47,6 +48,7 @@ class Graph(BaseModel):
 class FlowTemplate(BaseModel):
     id: str
     name: str
+    is_purchased:bool
     description: str
     category: Literal[
         "social-media",
@@ -67,7 +69,7 @@ class FlowTemplate(BaseModel):
 
     toolsUsed: List[ToolRef]
     systemToolsUsed: List[ToolRef]
-
+    product_id:str
     inputSchema: JSONSchema | None
     outputSchema: str | None
     isSellable: bool
@@ -78,6 +80,16 @@ class FlowTemplate(BaseModel):
 
     # apiConfig: Optional[APIConfig] = None
 
+def generate_receipt_id(length=8):
+    uid = uuid.uuid4().int  # Very large random int
+    base36 = ''
+    chars = '0123456789abcdefghijklmnopqrstuvwxyz'
+
+    while uid > 0:
+        uid, i = divmod(uid, 36)
+        base36 = chars[i] + base36
+
+    return base36[:length]
 
 template_data: dict[str, FlowTemplate] = {
     "6909ccff-4474-4cf6-8218-b5fce2f37122": FlowTemplate(
@@ -116,6 +128,8 @@ Perfect for content creators, marketers, and anyone looking to ride the wave of 
         updatedAt="2025-07-06 11:00:00.117264+00",
         version="1.0.0",
         visibility="public",
+        product_id="0zldk38q",
+        is_purchased=False
     ),
     "3e717fed-69eb-4745-ae89-83c83ef84cc9": FlowTemplate(
         category="software-development",
@@ -165,6 +179,8 @@ Perfect for content creators, marketers, and anyone looking to ride the wave of 
         updatedAt="2025-07-12 21:50:40.971086+00",
         version="1.0.0",
         visibility="public",
+        product_id="f9c8ab12",
+        is_purchased=False
     ),
 }
 
