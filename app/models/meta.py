@@ -28,6 +28,9 @@ class TweetData(Meta):
     image: str | None
     news_source: str | None
 
+class DocToPDF(Meta):
+    url:str|None
+
 
 class TrendData(SearchableMeta):
     title: str

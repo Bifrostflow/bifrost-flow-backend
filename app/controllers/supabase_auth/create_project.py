@@ -1,5 +1,6 @@
 import collections
 from datetime import datetime, timezone
+import webbrowser
 from fastapi import HTTPException
 from jose import jwt
 from pydantic import Base64Encoder
@@ -433,6 +434,71 @@ def update_supabase_flow_keys(
             print(e)
             res = APIResponse(
                 isSuccess=False, message="Failed to update.", data=None, error=None
+            )
+            return res
+    except SupabaseException as e:
+        res = APIResponse(isSuccess=False, message=f"{e}", data=None, error=None)
+        return res
+
+def get_supabase_flow_docs(
+    jwks: any, token: str, flow_id: str
+) -> APIResponse:
+    try:
+        token_data = jwt.decode(token, jwks, algorithms=["RS256"])
+        user_id = token_data["sub"]
+        if not user_id:
+            res = APIResponse(
+                isSuccess=False, message="Authorization failed.", data=None, error=None
+            )
+            return res
+        try:
+            # get flow path
+            data = (super_supabase.storage.from_("flow-data").list(flow_id,{"limit":5,"offset":0,"sortBy":{"column": "created_at", "order": "desc"}}))
+            # get all docs for that path
+            res = APIResponse(
+                    isSuccess=True,
+                    message="",
+                    data=data,
+                    error=None,
+                )
+            return res
+        except SupabaseException as e:
+            print(e)
+            res = APIResponse(
+                isSuccess=False, message="Failed to get data.", data=None, error=None
+            )
+            return res
+    except SupabaseException as e:
+        res = APIResponse(isSuccess=False, message=f"{e}", data=None, error=None)
+        return res
+
+def open_supabase_flow_doc(
+    jwks: any, token: str, flow_id: str,name: str
+) -> APIResponse:
+    try:
+        token_data = jwt.decode(token, jwks, algorithms=["RS256"])
+        user_id = token_data["sub"]
+        if not user_id:
+            res = APIResponse(
+                isSuccess=False, message="Authorization failed.", data=None, error=None
+            )
+            return res
+        try:
+            # get flow path
+            data = (super_supabase.storage.from_("flow-data").create_signed_url(f"{flow_id}/{name}",expires_in=60000))
+            webbrowser.open(data.get("signedUrl"))
+            # get all docs for that path
+            res = APIResponse(
+                    isSuccess=True,
+                    message="",
+                    data=None,
+                    error=None,
+                )
+            return res
+        except SupabaseException as e:
+            print(e)
+            res = APIResponse(
+                isSuccess=False, message="Failed to get data.", data=None, error=None
             )
             return res
     except SupabaseException as e:
