@@ -1,4 +1,5 @@
 import ast
+from langgraph.constants import START
 from langgraph.graph.state import CompiledStateGraph
 from openai.types.chat import ChatCompletionUserMessageParam
 from starlette.responses import StreamingResponse
@@ -7,6 +8,7 @@ import json
 
 from supabase import SupabaseException
 from app.controllers.engine.runflow import create_graph, convert_edges_to_nodes
+from app.controllers.get_system_node_by_id import get_node_ui_loading_message
 from app.controllers.supabase_auth.create_user import check_user_exist
 from app.models.models import Response, State, GraphData
 from jose import jwt
@@ -62,10 +64,19 @@ async def use_run_flow(jwks: any, token: str, data: GraphData):
                     keys_data: dict[str, str] = json.loads(
                         key_response.data[0].get("api_keys")
                     )
+                key_id=""
+                source_id=""
+
+                for edge in graph.get_graph().edges:
+                    if edge.source==START:
+                        key_id=edge.target
+                        for d in data.data:
+                            if d.get("target")==key_id:
+                                source_id=d.get("source")
                 _state: State = {
                     "response": response,
-                    "node_data": None,
-                    "ui_response": "Started Graph",
+                    "node_data": {"node_graph_id":source_id,"next_nodes":[key_id],"node_input":""},
+                    "ui_response":"Preparing Graph",
                     "flow_id": data.flow_id,
                     "user_id": user_id,
                     "api_keys": keys_data,
@@ -89,6 +100,21 @@ async def use_run_flow(jwks: any, token: str, data: GraphData):
 
 async def stream_graph(graph: CompiledStateGraph, state: State, flow_id: str):
     try:
+        print("STATE:: ",state)
+        chunk_data: State = {
+                "node_data": state.get("node_data"),
+                "response": {
+                            "messages": {"role":"assistant","content":"Query received."},
+                            "meta": {},
+                            "type": "",
+                        },
+                "ui_response": get_node_ui_loading_message(state.get("node_data").get("next_nodes")[0]),
+                "flow_id": flow_id,
+                "user_id": state.get("user_id"),
+            }
+        print("chunk_data: ",chunk_data)
+        yield f"data: {json.dumps(chunk_data)}\n\n"
+
         result = graph.astream(state, stream_mode="updates")
         async for chunk in result:
             await asyncio.sleep(0.1)

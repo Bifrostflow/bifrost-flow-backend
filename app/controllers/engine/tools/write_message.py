@@ -10,11 +10,12 @@ from app.controllers.engine.tools.tools_helpers.manage_messages import (
     ChatHistory,
     manage_flow_chat_history,
 )
+from app.utils.constants import OPEN_AI_KEY
 
 
 def write_message(state: State):
     print("🤖 --- doing write_message", state.get("node_data"))
-    user_openai_key = state.get("api_keys").get("openai")
+    user_openai_key = state.get("api_keys").get(OPEN_AI_KEY)
     client = OpenAI(api_key=user_openai_key)
 
     #  Define prompts
@@ -54,5 +55,4 @@ def write_message(state: State):
         "meta": state.get("response").get("meta"),
     }
     state["response"] = response
-    state["ui_response"] = "Finished Writing message."
     return state

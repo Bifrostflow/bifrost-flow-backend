@@ -102,6 +102,5 @@ async def google_trend(state: State):
         "meta": [*state.get("response").get("meta"), json.dumps(meta)],
     }
     state["response"] = response
-    state["ui_response"] = "Trend Search finished."
 
     return state

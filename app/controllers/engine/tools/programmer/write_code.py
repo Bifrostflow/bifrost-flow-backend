@@ -5,24 +5,26 @@ from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
 )
 
+from app.controllers.get_system_node_by_id import get_node_ui_loading_failed_message
 from app.models.models import State, Response
 from app.controllers.engine.tools.tools_helpers.manage_messages import (
     ChatHistory,
     manage_flow_chat_history,
 )
+from app.utils.constants import OPEN_AI_KEY
 
 
 def write_code(state: State):
     print("🤖 --- doing write_code", state.get("node_data"))
 
-    user_openai_key = state.get("api_keys").get("openai")
+    user_openai_key = state.get("api_keys").get(OPEN_AI_KEY)
     client = OpenAI(api_key=user_openai_key)
 
     #  Define prompts
-    system_prompt = """
+    system_prompt = f"""
             You are a Coding Expert Agent
             Your job is to write code only 
-            if provided prompt is not for code generation just skip by saying not able to generate code 
+            if provided prompt is not for code generation just skip by saying `{get_node_ui_loading_failed_message(state.get("node_data").get("node_graph_id"))}` 
             no need to add any extra text or message for user like how to use and other docs you can add code comments only 
         """
     tool_prompt = "write code based on provided response"
@@ -56,5 +58,4 @@ def write_code(state: State):
         "meta": state.get("response").get("meta"),
     }
     state["response"] = response
-    state["ui_response"] = "Finished writing code."
     return state

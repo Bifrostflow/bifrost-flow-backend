@@ -1,3 +1,4 @@
+import openai.types.chat
 from pathlib import Path
 import time
 from typing import Literal
@@ -5,15 +6,19 @@ import json
 
 
 from supabase import SupabaseException
-
+from openai.types.chat import (
+    ChatCompletionAssistantMessageParam,
+)
 from app.controllers.engine.tools.programmer.code_documentation import (
     CODE_DOCUMENTATION,
 )
 from app.controllers.engine.tools.save.save_to_flow_bucket import save_to_storage
 from app.controllers.engine.tools.search.google_trends import GOOGLE_TRENDS
 
+from app.models.meta import DocToPDF
 from app.models.models import State, Response
 from xhtml2pdf import pisa
+from app.controllers.get_system_node_by_id import get_node_ui_loading_failed_message
 
 
 async def manage_file_store(file_name: str, state: State):
@@ -25,16 +30,17 @@ async def manage_file_store(file_name: str, state: State):
     #     return True
     # else:
     print("before save", local_file_path.exists())
-    await save_to_storage(
+    doc_response_path=await save_to_storage(
         fileName=file_name,
         flow_id=state.get("flow_id"),
         local_file_path=local_file_path,
     )
-    return True
+    
+    return doc_response_path
 
 
 async def doc_to_pdf(state: State):
-    print("🤖 --- doing doc_to_pdf", state.get("node_data"))
+    print("🤖 --- doing doc_to_pdf",state)
     # code_documentation
     # check if it has incoming documents
     meta_list = state.get("response").get("meta")
@@ -51,16 +57,15 @@ async def doc_to_pdf(state: State):
                     filename = (
                         f"{meta_data.get("file_name_without_extension")}_{time.time()}"
                     )
-                    state["ui_response"] = "Document successfully generated."
+                    
                 if meta_data_type == GOOGLE_TRENDS:
                     content = meta_data.get("description")
                     filename = f"{time.time_ns()}"
-                    state["ui_response"] = "Document successfully generated."
+                    
     else:
-        messages = state.get("response").get("messages")[-1].get("content")
-        content = messages[0].get("content")
+        content = state.get("response").get("messages")[-1].get("content")
         filename = f"{time.time_ns()}"
-        state["ui_response"] = "Document successfully generated."
+        
     response_filename = convert_to_pdf(
         content_type="html",
         flow_id=state.get("flow_id"),
@@ -68,17 +73,25 @@ async def doc_to_pdf(state: State):
         content=content,
     )
     try:
-        await manage_file_store(file_name=response_filename, state=state)
+        document_path=await manage_file_store(file_name=response_filename, state=state)
+        response_chat_data = ChatCompletionAssistantMessageParam(
+            role="assistant", content="PDF Document generated."
+        )
+        doc_meta=DocToPDF(node_id=state.get("node_data").get("node_graph_id"),type="doc_to_pdf",url=document_path)
+        meta=doc_meta.model_dump()
+        response: Response = {
+            "type": "show-documents",
+            "messages": [*state.get("response").get("messages"),response_chat_data],
+            "meta": [*state.get("response").get("meta"), json.dumps(meta)],
+        }
+        state["response"] = response
+        return state
+
     except SupabaseException as error:
         print(error)
-        state["ui_response"] = "Failed to generate document"
-    response: Response = {
-        "type": "show-documents",
-        "messages": state.get("response").get("messages"),
-        "meta": state.get("response").get("meta"),
-    }
-    state["response"] = response
-    return state
+        state["ui_response"] = get_node_ui_loading_failed_message(state.get("node_data").get("node_graph_id"))
+        return state
+    
 
 
 def convert_to_pdf(

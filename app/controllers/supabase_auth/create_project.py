@@ -366,7 +366,7 @@ def load_supabase_nodes(jwks: any, token: str, flow_id: str) -> APIResponse:
                 raise HTTPException(status_code=403, detail="Unauthorized")
             response_nodes = (
                 super_supabase.table("flows")
-                .select("edges", "nodes", "api_keys")
+                .select("edges", "nodes", "api_keys","name")
                 .eq("id", flow_id)
                 .eq("user_id", user_id)
                 .execute()

@@ -15,7 +15,6 @@ class LocalDB:
 
     def get_by_id(self, id: str) -> Optional[ToolModel]:
         tools = self._load_tools()
-        print("id,tools.get(id): ", dict(tools).get(id))
         return dict(tools).get(id)
 
     def get_by_state(self, state: str) -> List[ToolModel]:

@@ -64,5 +64,4 @@ def tavily_search(state: State):
     }
     state["response"] = response
     print(state)
-    state["ui_response"] = "Search finished."
     return state

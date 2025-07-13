@@ -15,6 +15,7 @@ from app.controllers.engine.tools.tools_helpers.manage_messages import (
     ChatHistory,
     manage_flow_chat_history,
 )
+from app.utils.constants import OPEN_AI_KEY
 
 CODE_DOCUMENTATION = "code_documentation"
 
@@ -22,7 +23,7 @@ CODE_DOCUMENTATION = "code_documentation"
 def code_documentation(state: State):
     print("🤖 --- doing code_documentation", state.get("node_data"))
 
-    user_openai_key = state.get("api_keys").get("openai")
+    user_openai_key = state.get("api_keys").get(OPEN_AI_KEY)
     client = OpenAI(api_key=user_openai_key)
 
     # Define prompts
@@ -50,7 +51,6 @@ def code_documentation(state: State):
     parsed_response.type = CODE_DOCUMENTATION
     parsed_response.node_id = state.get("node_data").get("node_graph_id")
 
-    state["ui_response"] = "Finished code documentation."
     if not parsed_response:
         return state
     meta = parsed_response.model_dump()

@@ -73,6 +73,9 @@ class State(TypedDict):
     error: str
     node_data: None | NodeData  # node info only
 
+class UserMessage(TypedDict):
+    message:any  # node info only
+
 
 class ChatHistory(TypedDict):
     state: State
