@@ -96,6 +96,10 @@ class TrendNews(TypedDict):
 class TweetGenerationData(BaseModel):
     tweet: str
 
+class ClerkUser(BaseModel):
+    first_name:str
+    last_name:str
+    username:str
 
 # title-> title
 # hashtag-> title with _

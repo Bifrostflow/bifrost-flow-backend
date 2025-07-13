@@ -1,5 +1,6 @@
 import os
 
+from clerk_backend_api import Clerk
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -11,7 +12,7 @@ from fastapi_clerk_auth import (
 from pydantic import BaseModel
 import requests
 from supabase import SupabaseException
-
+from jose import jwt
 from app.controllers.flow import (
     get_flow_docs_controller,
     load_nodes_controller,
@@ -31,12 +32,13 @@ from app.controllers.supabase_auth.create_project import (
     edit_supabase_project,
 )
 from app.controllers.supabase_auth.try_template import use_try_template
-from app.models.models import GraphData
+from app.models.models import ClerkUser, GraphData
 from app.controllers.supabase_auth.create_user import (
     create_supabase_user,
     check_user_exist,
 )
 from app.models.projects import Project, EditProject, UpdateFlowGraph, UpdateFlowKeys
+from app.models.response import APIResponse
 
 # Use your Clerk JWKS endpoint
 clerk_config = ClerkConfig(jwks_url=os.getenv("JWKS"))
@@ -243,3 +245,23 @@ async def try_template(
         return use_try_template(jwks=jwks, token=credentials.credentials, template_id=template_id)
     except SupabaseException as e:
         return {"isSuccess": False, "message": "Something went wrong.", "error": e}
+    
+# user
+@app.post("/update-user")
+async def update_user(user:ClerkUser,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
+    jwks_url = os.getenv("JWKS")
+    jwks = requests.get(jwks_url).json()
+    token_data = jwt.decode(credentials.credentials, jwks, algorithms=["RS256"])
+    user_id = token_data["sub"]
+    if not user_id:
+        res = APIResponse(
+                isSuccess=False, message="Authorization failed.", data=None, error=None
+            )
+        return res
+    clerk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
+
+    update_kwargs = {k: v for k, v in user.model_dump(exclude_none=True).items()}
+    user = clerk.users.update(user_id=user_id, **update_kwargs)
+    return APIResponse(
+                isSuccess=True, message="User details updated.", data=user,error=None
+            )
