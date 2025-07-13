@@ -13,7 +13,9 @@ import requests
 from supabase import SupabaseException
 
 from app.controllers.flow import (
+    get_flow_docs_controller,
     load_nodes_controller,
+    open_flow_docs_controller,
     update_flow_keys_controller,
     update_nodes_controller,
 )
@@ -67,7 +69,7 @@ async def test():
 
 
 @app.get("/system-tools")
-async def get_system_nodes():
+async def get_system_nodes(credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard),):
     return use_get_system_nodes()
 
 @app.get("/templates")
@@ -81,7 +83,7 @@ async def get_templates(template_id: str,
 
 
 @app.get("/system-tools/{node_id}")
-async def get_system_node_by_id(node_id: str):
+async def get_system_node_by_id(node_id: str,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard),):
     return use_get_system_node_by_id(node_id=node_id)
 
 
@@ -193,6 +195,21 @@ async def update_flow_keys(
     credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard),
 ):
     return await update_flow_keys_controller(flow_keys, credentials)
+
+@app.get("/get-flow-docs")
+async def get_flow_docs(
+    flow_id: str,
+    credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard),
+):
+    return await get_flow_docs_controller(flow_id, credentials)
+
+@app.get("/open-doc")
+async def get_flow_docs(
+    flow_id: str,
+    name:str,
+    credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard),
+):
+    return await open_flow_docs_controller(flow_id,name, credentials)
 
 
 @app.get("/load-nodes")
