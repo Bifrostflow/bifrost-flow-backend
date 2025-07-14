@@ -91,6 +91,8 @@ def generate_receipt_id(length=8):
 
     return base36[:length]
 
+# print(generate_receipt_id())
+
 template_data: dict[str, FlowTemplate] = {
     "6909ccff-4474-4cf6-8218-b5fce2f37122": FlowTemplate(
         category="social-media",
@@ -100,8 +102,8 @@ template_data: dict[str, FlowTemplate] = {
 Stay ahead of the curve with our Trending Tweet Generator — a smart tool that creates tweets based on the hottest topics from Google Trends. Simply plug in your OpenAI API key, and let the magic happen. In seconds, a fresh, relevant tweet will be auto-filled right into your browser — ready to copy, share, or post.
 Perfect for content creators, marketers, and anyone looking to ride the wave of trending conversations on X (Twitter). Stay tuned for more updates...""",
         graph=Graph(
-            edges="""{\"data\":[{\"tool_input\":\"\",\"source\":\"1-686a060b7493977b931934c3\",\"target\":\"2-686915a6acd2b4a126714ec3\",\"id\":\"xy-edge__1-686a060b7493977b931934c3-2-686915a6acd2b4a126714ec3\"},{\"tool_input\":\"\",\"source\":\"2-686915a6acd2b4a126714ec3\",\"target\":\"3-686a027e7493977b931934c2\",\"id\":\"xy-edge__2-686915a6acd2b4a126714ec3-3-686a027e7493977b931934c2\"},{\"tool_input\":\"\",\"source\":\"3-686a027e7493977b931934c2\",\"target\":\"4-684e733dc2b59ec01fb72c77\",\"id\":\"xy-edge__3-686a027e7493977b931934c2-4-684e733dc2b59ec01fb72c77\"}]}""",
-            nodes="""{\"data\":[{\"id\":\"1-686a060b7493977b931934c3\",\"type\":\"initiate\",\"data\":{\"id\":\"686a060b7493977b931934c3\"},\"position\":{\"x\":244,\"y\":240.5},\"measured\":{\"width\":84,\"height\":25},\"selected\":false,\"dragging\":false},{\"id\":\"2-686915a6acd2b4a126714ec3\",\"type\":\"action\",\"data\":{\"id\":\"686915a6acd2b4a126714ec3\"},\"position\":{\"x\":106,\"y\":299.5},\"measured\":{\"width\":361,\"height\":34},\"selected\":false,\"dragging\":false},{\"id\":\"3-686a027e7493977b931934c2\",\"type\":\"generate\",\"data\":{\"id\":\"686a027e7493977b931934c2\"},\"position\":{\"x\":141,\"y\":391.5},\"measured\":{\"width\":291,\"height\":43},\"selected\":false,\"dragging\":false},{\"id\":\"4-684e733dc2b59ec01fb72c77\",\"type\":\"close\",\"data\":{\"id\":\"684e733dc2b59ec01fb72c77\"},\"position\":{\"x\":256,\"y\":473.5},\"measured\":{\"width\":62,\"height\":25},\"selected\":true,\"dragging\":false}]}""",
+            edges="""{\"data\":[{\"tool_input\":\"\",\"source\":\"1-686a060b7493977b931934c3\",\"target\":\"2-686915a6acd2b4a126714ec3\",\"id\":\"xy-edge__1-686a060b7493977b931934c3-2-686915a6acd2b4a126714ec3\",\"type\":\"smoothstep\"},{\"tool_input\":\"\",\"source\":\"2-686915a6acd2b4a126714ec3\",\"target\":\"3-686a027e7493977b931934c2\",\"id\":\"xy-edge__2-686915a6acd2b4a126714ec3-3-686a027e7493977b931934c2\",\"type\":\"smoothstep\"},{\"tool_input\":\"\",\"source\":\"3-686a027e7493977b931934c2\",\"target\":\"4-684e733dc2b59ec01fb72c77\",\"id\":\"xy-edge__3-686a027e7493977b931934c2-4-684e733dc2b59ec01fb72c77\",\"type\":\"smoothstep\"}]}""",
+            nodes="""{\"data\":[{\"id\":\"1-686a060b7493977b931934c3\",\"type\":\"initiate\",\"data\":{\"id\":\"686a060b7493977b931934c3\"},\"position\":{\"x\":144,\"y\":124.5},\"measured\":{\"width\":180,\"height\":63},\"selected\":false,\"dragging\":false},{\"id\":\"2-686915a6acd2b4a126714ec3\",\"type\":\"action\",\"data\":{\"id\":\"686915a6acd2b4a126714ec3\"},\"position\":{\"x\":-7,\"y\":257.5},\"measured\":{\"width\":256,\"height\":61},\"selected\":false,\"dragging\":false},{\"id\":\"3-686a027e7493977b931934c2\",\"type\":\"generate\",\"data\":{\"id\":\"686a027e7493977b931934c2\"},\"position\":{\"x\":244,\"y\":364.5},\"measured\":{\"width\":256,\"height\":82},\"selected\":false,\"dragging\":false},{\"id\":\"4-684e733dc2b59ec01fb72c77\",\"type\":\"close\",\"data\":{\"id\":\"684e733dc2b59ec01fb72c77\"},\"position\":{\"x\":153,\"y\":571.5},\"measured\":{\"width\":180,\"height\":51},\"selected\":true,\"dragging\":false}]}""",
         ),
         icon=None,
         id="6909ccff-4474-4cf6-8218-b5fce2f37122",
@@ -110,7 +112,7 @@ Perfect for content creators, marketers, and anyone looking to ride the wave of 
         keywords=["twitter", "google trend", "tweet generator"],
         name="Trending Tweet Generator",
         outputSchema="",
-        price=0,
+        price=9.99,
         systemToolsUsed=[
             ToolRef(
                 id="686915a6acd2b4a126714ec3",
@@ -149,7 +151,7 @@ Perfect for content creators, marketers, and anyone looking to ride the wave of 
         keywords=["code", "code review", "code to pdf"],
         name="Code to PDF",
         outputSchema="",
-        price=1,
+        price=0,
         systemToolsUsed=[
             ToolRef(
                 id="684a0c5df84f78f814367574",
@@ -180,6 +182,44 @@ Perfect for content creators, marketers, and anyone looking to ride the wave of 
         version="1.0.0",
         visibility="public",
         product_id="f9c8ab12",
+        is_purchased=False
+    ),
+    "686bf8f4-2cf5-4a4c-8c9a-f1c9fe2d2fca": FlowTemplate(
+        category="writing",
+        createdAt="2025-07-14 16:46:04.760656+00",
+        createdBy="admin",
+        description="""Turn your ideas into cinematic gold with our intelligent script generator. Just share your story idea, and let the tool craft a professionally formatted short film script — ready to download as a clean PDF.
+Perfect for indie creators, storytellers, and filmmakers who want to write fast, smart, and creatively — without the hassle of formatting.""",
+        graph=Graph(
+            edges="""{\"data\":[{\"tool_input\":\"\",\"source\":\"1-684d858808dca10a34a65a53\",\"target\":\"2-6866c9cf9f3b944d6d0f9935\",\"type\":\"smoothstep\",\"id\":\"xy-edge__1-684d858808dca10a34a65a53-2-6866c9cf9f3b944d6d0f9935\"},{\"tool_input\":\"\",\"source\":\"2-6866c9cf9f3b944d6d0f9935\",\"target\":\"3-6853c80d8ed701f2efcd6fd2\",\"type\":\"smoothstep\",\"id\":\"xy-edge__2-6866c9cf9f3b944d6d0f9935-3-6853c80d8ed701f2efcd6fd2\"},{\"tool_input\":\"\",\"source\":\"3-6853c80d8ed701f2efcd6fd2\",\"target\":\"4-684e733dc2b59ec01fb72c77\",\"type\":\"smoothstep\",\"id\":\"xy-edge__3-6853c80d8ed701f2efcd6fd2-4-684e733dc2b59ec01fb72c77\"}]}""",
+            nodes="""{\"data\":[{\"id\":\"1-684d858808dca10a34a65a53\",\"type\":\"initiate\",\"data\":{\"id\":\"684d858808dca10a34a65a53\"},\"position\":{\"x\":219,\"y\":-19},\"measured\":{\"width\":180,\"height\":51},\"selected\":false,\"dragging\":false},{\"id\":\"2-6866c9cf9f3b944d6d0f9935\",\"type\":\"generate\",\"data\":{\"id\":\"6866c9cf9f3b944d6d0f9935\"},\"position\":{\"x\":90,\"y\":146},\"measured\":{\"width\":256,\"height\":70},\"selected\":false,\"dragging\":false},{\"id\":\"3-6853c80d8ed701f2efcd6fd2\",\"type\":\"generate\",\"data\":{\"id\":\"6853c80d8ed701f2efcd6fd2\"},\"position\":{\"x\":293,\"y\":332},\"measured\":{\"width\":256,\"height\":51},\"selected\":true,\"dragging\":false},{\"id\":\"4-684e733dc2b59ec01fb72c77\",\"type\":\"close\",\"data\":{\"id\":\"684e733dc2b59ec01fb72c77\"},\"position\":{\"x\":231,\"y\":524},\"measured\":{\"width\":180,\"height\":51},\"selected\":false,\"dragging\":false}]}""",
+        ),
+        icon=None,
+        id="686bf8f4-2cf5-4a4c-8c9a-f1c9fe2d2fca",
+        inputSchema=None,
+        isSellable=True,
+        keywords=["script writer", "writer"],
+        name="Script writer",
+        outputSchema="",
+        price=9.99,
+        systemToolsUsed=[
+            ToolRef(
+                id="6853c80d8ed701f2efcd6fd2",
+                name="HTML/Markdown to PDF",
+                description="To convert any HTML or Markdown file to pdf.",
+            ),
+            ToolRef(
+                id="6853c80d8ed701f2efcd6fd2",
+                name="Script Writer",
+                description="Write Professionals Script for any provided content.",
+            ),
+        ],
+        tags=["script_writer","film","writer"],
+        toolsUsed=[],
+        updatedAt="2025-07-12 21:50:40.971086+00",
+        version="1.0.0",
+        visibility="public",
+        product_id="2zl2i1lb",
         is_purchased=False
     ),
 }

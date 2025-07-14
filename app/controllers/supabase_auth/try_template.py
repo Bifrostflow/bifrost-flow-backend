@@ -35,8 +35,9 @@ def use_try_template(jwks: any, token: str, template_id: str) -> APIResponse:
             if template_data.price>0:
                 receipt=f"{template_data.product_id}_{user_id.split("_")[1]}"
                 receipt_data=super_supabase.table("payments").select("status").eq("receipt",receipt).execute()
-                if(receipt_data.count and receipt_data.count > 0):
-                    if receipt_data.data[0].get("status") !="capture":
+                print(receipt_data,receipt)
+                if(len(receipt_data.data)>0):
+                    if receipt_data.data[0].get("status") !="captured":
                         res = APIResponse(
                             isSuccess=False, message="Incomplete payment.", data={"status":"re-initiate-template-payment","receipt":receipt}, error=None
                         )

@@ -57,7 +57,7 @@ async def google_trend(state: State):
     if source_html:
         print(source_html)
         description_body = source_html.find("body")
-        description_list = description_body.find_all("p")
+        description_list = description_body.find_all(["p", "div","article"])
 
         description = ""
         for desc in description_list:
