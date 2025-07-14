@@ -19,15 +19,33 @@ from app.utils import fallback_snap
 def use_try_template(jwks: any, token: str, template_id: str) -> APIResponse:
     try:
         token_data = jwt.decode(token, jwks, algorithms=["RS256"])
-        user_id = token_data["sub"]
+        user_id:str = token_data["sub"]
         if not user_id:
             res = APIResponse(
                 isSuccess=False, message="Authorization failed.", data=None, error=None
             )
             return res
+        
         exist = check_user_exist(jwks, token)
+
         print(exist.isExist)
         if exist.isExist:
+            # check if user has bought this template
+            template_data=template_db.get_by_id(template_id)
+            if template_data.price>0:
+                receipt=f"{template_data.product_id}_{user_id.split("_")[1]}"
+                receipt_data=super_supabase.table("payments").select("status").eq("receipt",receipt).execute()
+                if(receipt_data.count and receipt_data.count > 0):
+                    if receipt_data.data[0].get("status") !="capture":
+                        res = APIResponse(
+                            isSuccess=False, message="Incomplete payment.", data={"status":"re-initiate-template-payment","receipt":receipt}, error=None
+                        )
+                        return res
+                else:
+                    res = APIResponse(
+                    isSuccess=False, message="Template is not purchased.", data={"status":"show-template-pay"}, error=None
+                    )
+                    return res 
              # Check if the user has reached their project limit
             user_data = (
                 super_supabase.table("users")
