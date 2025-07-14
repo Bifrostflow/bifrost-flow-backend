@@ -46,11 +46,17 @@ class Node(TypedDict):
     next_node_id: List[str]
     node_input: str | None
 
+class LinkToOpen(TypedDict):
+    label:str
+    url:str
+    node_id:str
+    type:str
 
 class Response(TypedDict):
     messages: List[ChatCompletionUserMessageParam | ChatCompletionAssistantMessageParam]
     type: str | None
     meta: List[str]
+    links_to_open:List[LinkToOpen]
 
 
 class ResponseModel(BaseModel):

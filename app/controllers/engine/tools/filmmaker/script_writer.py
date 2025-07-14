@@ -6,6 +6,7 @@ from openai.types.chat import (
     ChatCompletionSystemMessageParam,
 )
 
+from app.db.template_data import generate_receipt_id
 from app.models.meta import ScriptWriterMeta
 from app.models.models import State, Response
 from app.controllers.engine.prompts.filmmaker.script_writer import (
@@ -48,6 +49,7 @@ def script_writer(state: State):
     parsed_response=query_res.choices[0].message.parsed
     parsed_response.node_id=state.get("node_data").get("node_graph_id")
     parsed_response.type=SCRIPT_WRITER
+    parsed_response.slug_name=f"{parsed_response.slug_name}_{generate_receipt_id()}"
     meta=parsed_response.model_dump()
     message = parsed_response.response_message
     
@@ -59,8 +61,9 @@ def script_writer(state: State):
 
     response: Response = {
         "messages": messages,
-        "type": state.get("response").get("type"),
         "meta": [*state.get("response").get("meta"),json.dumps(meta)],
+        "type": state.get("response").get("type"),
+        "links_to_open":state.get("response").get("links_to_open"),
     }
     state["response"] = response
     return state

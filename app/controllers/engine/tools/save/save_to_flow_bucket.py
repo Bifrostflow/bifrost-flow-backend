@@ -1,5 +1,4 @@
 import os
-import webbrowser
 import supabase
 from app.db.supa_base import super_supabase
 
@@ -17,8 +16,6 @@ async def save_to_storage(flow_id:str,fileName:str,local_file_path:str):
             # dir_path = Path(f"./temp/{flow_id}").resolve()
             # os.removedirs(name=dir_path)
             flow_data_pdf_path=super_supabase.storage.from_("flow-data").create_signed_url(path=flow_data_bucket.path,expires_in=60000)
-            
-            webbrowser.open(flow_data_pdf_path.get("signedUrl"))
             
             return flow_data_pdf_path.get("signedUrl")
         return "error1"

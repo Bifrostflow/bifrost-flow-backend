@@ -75,6 +75,7 @@ async def classify_message(state: State):
         "type": type_map[route_id],
         "messages": [*state.get("response").get("messages"),response_message],
         "meta": state.get("response").get("meta"),
+        "links_to_open":state.get("response").get("links_to_open"),
     }
     state["response"] = response
     return state

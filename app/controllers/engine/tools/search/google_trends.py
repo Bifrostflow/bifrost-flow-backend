@@ -39,10 +39,20 @@ async def google_trend(state: State):
 
     # scrapping start
     trend_items = await get_rss(
-        "https://trends.google.com/trending/rss?geo=IN&hours=24&status=active&sort=recency"
+        "https://trends.google.com/trending/rss?geo=IN-RJ&sort=recency&category=3"
     )
     print("------------RSS", trend_items[0])
-    top_news_item = trend_items[0].get
+
+    most_traffic=0
+    most_traffic_index=0
+
+    for i,t_item in enumerate(trend_items):
+        traffic=int(str(t_item.get("ht_approx_traffic")).replace("+",""))
+        print(traffic)
+        if traffic>most_traffic:
+            most_traffic=traffic
+            most_traffic_index=i
+    top_news_item = trend_items[most_traffic_index].get
 
     top_news: TrendNews = {
         "image": top_news_item("ht_news_item_picture"),
@@ -55,16 +65,28 @@ async def google_trend(state: State):
     print("-----here")
     source_html = await get_html(top_news.get("news_source"))
     if source_html:
-        print(source_html)
+        # print(source_html)
         description_body = source_html.find("body")
-        description_list = description_body.find_all(["p", "div","article"])
+        description_list = description_body.find_all(["p", "div"])
 
         description = ""
+        possible_length=0
         for desc in description_list:
             desc_text=desc.get_text()
+            possible_length+=len(description)
             if len(desc_text)>80:
-                description += f"\n\n{ desc.get_text()}"
-        print("description: ", description)
+                if any(word in desc_text for word in  top_news.get("title").split(" ")):
+                    description += f"\n\n{ desc.get_text()}"
+        
+        if len(description)>5000:
+            mid = len(description) // 2
+            start = max(mid - 5000 // 2, 0)
+            end = start + 5000
+            description = description[start:end]
+
+        print("possible_length: ",possible_length)
+        print("final_length: ",len(description))
+            
         top_news["description"] = description
     else:
         top_news["description"] = top_news.get("title")
@@ -102,6 +124,7 @@ async def google_trend(state: State):
         "messages": messages,
         "type": state.get("response").get("type"),
         "meta": [*state.get("response").get("meta"), json.dumps(meta)],
+        "links_to_open":state.get("response").get("links_to_open"),
     }
     state["response"] = response
 

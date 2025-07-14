@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-import webbrowser
 from fastapi import HTTPException
 from jose import jwt
 from pydantic import Base64Encoder
@@ -485,12 +484,11 @@ def open_supabase_flow_doc(
         try:
             # get flow path
             data = (super_supabase.storage.from_("flow-data").create_signed_url(f"{flow_id}/{name}",expires_in=60000))
-            webbrowser.open(data.get("signedUrl"))
             # get all docs for that path
             res = APIResponse(
                     isSuccess=True,
                     message="",
-                    data=None,
+                    data={"url":data.get("signedUrl")},
                     error=None,
                 )
             return res

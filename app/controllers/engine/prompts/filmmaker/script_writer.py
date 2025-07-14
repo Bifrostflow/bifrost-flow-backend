@@ -210,10 +210,29 @@ The final output must be wrapped in HTML as: <!DOCTYPE html>
   <head>
     <title>Generated Script</title>
     <meta charset="UTF-8" />
-   
+    <style>
+  body {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  table, td, th {
+    word-wrap: break-word;
+    white-space: normal;
+  }
+
+  div, p, span {
+    word-wrap: break-word;
+    white-space: normal;
+  }
+</style>
   </head>
   <body>
     <pre>
+        [SCRIPT NAME] 
+        PAGES: [NO OF PAGES]
+        
         [INSERT SCREENPLAY FORMAT SCRIPT HERE]
     </pre>
   </body>

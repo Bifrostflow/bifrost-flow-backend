@@ -17,7 +17,7 @@ from app.controllers.engine.tools.save.save_to_flow_bucket import save_to_storag
 from app.controllers.engine.tools.search.google_trends import GOOGLE_TRENDS
 
 from app.models.meta import DocToPDF
-from app.models.models import State, Response
+from app.models.models import LinkToOpen, State, Response
 from xhtml2pdf import pisa
 from app.controllers.get_system_node_by_id import get_node_ui_loading_failed_message
 
@@ -39,6 +39,7 @@ async def manage_file_store(file_name: str, state: State):
     
     return doc_response_path
 
+DOC_TO_PDF="doc_to_pdf"
 
 async def doc_to_pdf(state: State):
     print("🤖 --- doing doc_to_pdf",state)
@@ -80,12 +81,14 @@ async def doc_to_pdf(state: State):
         response_chat_data = ChatCompletionAssistantMessageParam(
             role="assistant", content="PDF Document generated."
         )
-        doc_meta=DocToPDF(node_id=state.get("node_data").get("node_graph_id"),type="doc_to_pdf",url=document_path)
+        doc_meta=DocToPDF(node_id=state.get("node_data").get("node_graph_id"),type=DOC_TO_PDF,url=document_path)
         meta=doc_meta.model_dump()
+        link_to_open=LinkToOpen(label="Open Document",url=document_path, node_id=state.get("node_data").get("node_graph_id"),type=DOC_TO_PDF)
         response: Response = {
             "type": "show-documents",
             "messages": [*state.get("response").get("messages"),response_chat_data],
             "meta": [*state.get("response").get("meta"), json.dumps(meta)],
+            "links_to_open":[*state.get("response").get("links_to_open"),json.dumps(link_to_open)]
         }
         state["response"] = response
         return state

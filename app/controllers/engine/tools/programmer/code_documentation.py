@@ -69,6 +69,7 @@ def code_documentation(state: State):
         "type": state.get("response").get("type"),
         "messages": messages,
         "meta": [*state.get("response").get("meta"), json.dumps(meta)],
+        "links_to_open":state.get("response").get("links_to_open"),
     }
     state["response"] = response
     return state

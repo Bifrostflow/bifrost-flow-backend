@@ -50,7 +50,7 @@ async def use_run_flow(jwks: any, token: str, data: GraphData):
                     role="user", content=data.input
                 )
                 messages = [user_prompt]
-                response: Response = {"messages": messages, "type": None, "meta": []}
+                response: Response = {"messages": messages, "type": None, "meta": [],"links_to_open":[]}
                 # fetch key from user
                 key_response = (
                     super_supabase.table("flows")
@@ -107,6 +107,7 @@ async def stream_graph(graph: CompiledStateGraph, state: State, flow_id: str):
                             "messages": {"role":"assistant","content":"Query received."},
                             "meta": {},
                             "type": "",
+                            "links_to_open":state.get("response").get("links_to_open")
                         },
                 "ui_response": get_node_ui_loading_message(state.get("node_data").get("next_nodes")[0]),
                 "flow_id": flow_id,
@@ -122,6 +123,7 @@ async def stream_graph(graph: CompiledStateGraph, state: State, flow_id: str):
             response_data = chunked_state.get("response")
             response_data_ui_message = chunked_state.get("ui_response")
             meta_for_me = {}
+
             for meta in chunked_state.get("response").get("meta"):
                 meta_json = json.loads(meta)
                 if meta_json.get("node_id") == chunked_state.get("node_data").get(
@@ -129,11 +131,21 @@ async def stream_graph(graph: CompiledStateGraph, state: State, flow_id: str):
                 ):
                     meta_for_me = meta_json
                     break
+            
+            my_link={}
+            for link in chunked_state.get("response").get("links_to_open"):
+                link_json = json.loads(link)
+                if link_json.get("node_id") == chunked_state.get("node_data").get(
+                    "node_graph_id"
+                ):
+                    my_link = link_json
+                break
 
             chunk_data_response: Response = {
                 "messages": [],
                 "meta": meta_for_me,
                 "type": chunked_state.get("response").get("type"),
+                "links_to_open":my_link
             }
             chunk_data_response["messages"] = response_data.get("messages")[-1]
             chunk_data: State = {

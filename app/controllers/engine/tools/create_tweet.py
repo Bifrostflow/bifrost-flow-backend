@@ -1,5 +1,4 @@
 import json
-import webbrowser
 from openai import OpenAI
 from openai.types.chat import (
     ChatCompletionUserMessageParam,
@@ -10,6 +9,7 @@ from openai.types.chat import (
 
 from app.models.meta import TweetData
 from app.models.models import (
+    LinkToOpen,
     State,
     Response,
     TweetGenerationData,
@@ -20,6 +20,7 @@ from app.controllers.engine.tools.tools_helpers.manage_messages import (
 )
 from app.utils.constants import OPEN_AI_KEY
 
+CREATE_TWEET="create_tweet"
 
 def create_tweet(state: State):
     print("🤖 --- doing write_message", state.get("node_data"))
@@ -52,7 +53,7 @@ def create_tweet(state: State):
     final_tweet = TweetData(
         image=None,
         node_id=state.get("node_data").get("node_graph_id"),
-        type="create_tweet",
+        type=CREATE_TWEET,
         tweet="",
         news_source="",
     )
@@ -128,7 +129,7 @@ def create_tweet(state: State):
     meta_response = TweetData(
         image=final_tweet.image,
         node_id=state.get("node_data").get("node_graph_id"),
-        type="create_tweet",
+        type=CREATE_TWEET,
         tweet=final_tweet.tweet,
         news_source=final_tweet.news_source,
     )
@@ -138,14 +139,16 @@ def create_tweet(state: State):
 
     # create response
     print("creating response")
+    if final_tweet.tweet:
+        url = f"https://twitter.com/intent/tweet?text={final_tweet.tweet}&size=large"
+        link_to_open=LinkToOpen(label="Launch Tweet",url=url,node_id=state.get("node_data").get("node_graph_id"),type=CREATE_TWEET)
+
     response: Response = {
         "messages": messages,
         "type": state.get("response").get("type"),
         "meta": [*state.get("response").get("meta"), json.dumps(meta)],
+        "links_to_open":[*state.get("response").get("links_to_open"),json.dumps(link_to_open)]
     }
-    if final_tweet.tweet:
-        url = f"https://twitter.com/intent/tweet?text={final_tweet.tweet}&size=large"
-        webbrowser.open(url)
     print("creating response end")
     # create response end
     

@@ -56,6 +56,7 @@ def write_code(state: State):
         "messages": messages,
         "type": state.get("response").get("type"),
         "meta": state.get("response").get("meta"),
+        "links_to_open":state.get("response").get("links_to_open"),
     }
     state["response"] = response
     return state
