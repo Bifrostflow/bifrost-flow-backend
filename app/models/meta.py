@@ -31,6 +31,11 @@ class TweetData(Meta):
 class DocToPDF(Meta):
     url:str|None
 
+class ScriptWriterMeta(Meta):
+    content:str
+    response_message:str
+    slug_name:str
+
 
 class TrendData(SearchableMeta):
     title: str

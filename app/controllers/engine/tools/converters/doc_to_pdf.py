@@ -9,6 +9,7 @@ from supabase import SupabaseException
 from openai.types.chat import (
     ChatCompletionAssistantMessageParam,
 )
+from app.controllers.engine.tools.filmmaker.script_writer import SCRIPT_WRITER
 from app.controllers.engine.tools.programmer.code_documentation import (
     CODE_DOCUMENTATION,
 )
@@ -48,7 +49,7 @@ async def doc_to_pdf(state: State):
     content = ""
     # check if content in meta
     if len(meta_list) > 0:
-        for meta_string in meta_list:
+        for meta_string in reversed(meta_list):
             if not content:
                 meta_data = json.loads(meta_string)
                 meta_data_type = meta_data.get("type")
@@ -57,10 +58,12 @@ async def doc_to_pdf(state: State):
                     filename = (
                         f"{meta_data.get("file_name_without_extension")}_{time.time()}"
                     )
-                    
                 if meta_data_type == GOOGLE_TRENDS:
                     content = meta_data.get("description")
                     filename = f"{time.time_ns()}"
+                if meta_data_type == SCRIPT_WRITER:
+                    content = meta_data.get("content")
+                    filename = meta_data.get("slug_name")
                     
     else:
         content = state.get("response").get("messages")[-1].get("content")
