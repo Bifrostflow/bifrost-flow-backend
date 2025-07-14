@@ -61,7 +61,9 @@ async def google_trend(state: State):
 
         description = ""
         for desc in description_list:
-            description += f"\n\n{ desc.get_text()}"
+            desc_text=desc.get_text()
+            if len(desc_text)>80:
+                description += f"\n\n{ desc.get_text()}"
         print("description: ", description)
         top_news["description"] = description
     else:
