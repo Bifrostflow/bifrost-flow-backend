@@ -62,6 +62,7 @@ class Response(TypedDict):
 class ResponseModel(BaseModel):
     type: str
     prefix: int
+    message:str
 
 
 class NodeData(TypedDict):
