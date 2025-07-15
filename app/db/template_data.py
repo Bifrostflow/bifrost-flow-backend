@@ -112,7 +112,7 @@ Perfect for content creators, marketers, and anyone looking to ride the wave of 
         keywords=["twitter", "google trend", "tweet generator"],
         name="Trending Tweet Generator",
         outputSchema="",
-        price=9.99,
+        price=0,
         systemToolsUsed=[
             ToolRef(
                 id="686915a6acd2b4a126714ec3",
