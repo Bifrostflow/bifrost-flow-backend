@@ -2,7 +2,7 @@ import datetime
 import os
 
 from clerk_backend_api import Clerk
-from fastapi import FastAPI, Depends, HTTPException
+from fastapi import FastAPI, Depends, File, Form, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from fastapi_clerk_auth import (
@@ -10,6 +10,7 @@ from fastapi_clerk_auth import (
     ClerkConfig,
     HTTPAuthorizationCredentials,
 )
+from openai import OpenAI
 from pydantic import BaseModel
 import razorpay
 import requests
@@ -25,7 +26,7 @@ from app.controllers.flow import (
 from app.controllers.get_system_node_by_id import use_get_system_node_by_id
 from app.controllers.get_system_nodes import use_get_system_nodes
 from app.controllers.get_templates import use_get_template_by_id, use_get_templates
-from app.controllers.run_flow import use_run_flow
+from app.controllers.run_flow import check_bollaborator_access, get_user_keys, use_run_flow
 from app.controllers.supabase_auth.create_payment import Payment, SupabasePayment, create_supabase_payment, update_supabase_payment
 from app.controllers.supabase_auth.create_project import (
     create_supabase_project,
@@ -44,6 +45,8 @@ from app.models.projects import Project, EditProject, UpdateFlowGraph, UpdateFlo
 from app.models.response import APIResponse
 import hmac
 import hashlib
+
+from app.utils.constants import OPEN_AI_KEY
 
 # Use your Clerk JWKS endpoint
 clerk_config = ClerkConfig(jwks_url=os.getenv("JWKS"))
@@ -227,6 +230,7 @@ async def load_nodes(
     return await load_nodes_controller(flow_id, credentials)
 
 
+
 @app.post("/run-flow")
 async def run_flow(
     data: GraphData,
@@ -238,6 +242,50 @@ async def run_flow(
         return await use_run_flow(jwks=jwks, token=credentials.credentials, data=data)
     except SupabaseException as e:
         return {"isSuccess": False, "message": "Something went wrong.", "error": e}
+
+@app.post("/transcribe")
+async def transcribe_audio(flow_id:str= Form(...),audio: UploadFile = File(...),credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard),):
+    jwks_url = os.getenv("JWKS")
+    jwks = requests.get(jwks_url).json()
+    token_data = jwt.decode(credentials.credentials, jwks, algorithms=["RS256"])
+    user_id = token_data["sub"]
+    # ADD USERS CHECK FROM FLOW TABLE
+    if not user_id:
+            res = APIResponse(
+                isSuccess=False, message="Authorization failed.", data=None, error=None
+            )
+            return res
+    has_access=await check_bollaborator_access(user_id=user_id,flow_id=flow_id)
+    if not has_access:
+        res = APIResponse(
+                isSuccess=False, message="Access denied.", data=None, error=None
+            )
+        return res
+    try:
+        # Read audio file bytes
+        audio_bytes = await audio.read()
+        print("audio_bytes: ",audio_bytes)
+        keys=await get_user_keys(user_id=user_id,flow_id=flow_id)
+        user_openai_key = keys.get(OPEN_AI_KEY)
+        client = OpenAI(api_key=user_openai_key)
+        # Save temporarily to disk (required by OpenAI API)
+        temp_file_path = f"temp_{audio.filename}"
+        with open(temp_file_path, "wb") as f:
+            f.write(audio_bytes)
+
+        # Use Whisper-1 for transcription
+        print("temp_file_path: ",temp_file_path)
+        with open(temp_file_path, "rb") as audio_file:
+            transcript = client.audio.transcriptions.create(
+                model="whisper-1",
+                file=audio_file,
+            )
+        # Delete the temp file
+        os.remove(temp_file_path)
+
+        return APIResponse(data={"text": transcript.text},error=None,isSuccess=True,message="success")
+    except Exception as e:
+        return APIResponse(data=None,error=None,isSuccess=False,message=f"failed: {e}")
 
 @app.get("/try-template")
 async def try_template(

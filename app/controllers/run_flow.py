@@ -16,6 +16,33 @@ from app.db.supa_base import super_supabase
 
 from app.models.response import APIResponse
 
+async def get_user_keys(flow_id:str,user_id:str):
+    key_response = (
+                    super_supabase.table("flows")
+                    .select("api_keys")
+                    .eq("id", flow_id)
+                    .eq("user_id", user_id)
+                    .execute()
+                )
+    keys_data = {}
+    if key_response.data[0].get("api_keys"):
+        keys_data: dict[str, str] = json.loads(
+                        key_response.data[0].get("api_keys")
+    )
+    return keys_data
+
+async def check_bollaborator_access(flow_id:str,user_id:str):
+        collaborators_data = (
+                super_supabase.table("flows")
+                .select("users")
+                .eq("id", flow_id)
+                .eq("user_id", user_id)
+                .execute()
+            )
+        c_users = ast.literal_eval(collaborators_data.data[0].get("users"))
+        users = c_users.get("data")
+        has_access = any(user.get("uid") == user_id for user in users)
+        return has_access
 
 async def use_run_flow(jwks: any, token: str, data: GraphData):
     try:
@@ -76,7 +103,7 @@ async def use_run_flow(jwks: any, token: str, data: GraphData):
                 _state: State = {
                     "response": response,
                     "node_data": {"node_graph_id":source_id,"next_nodes":[key_id],"node_input":""},
-                    "ui_response":"Preparing Graph",
+                    "ui_response":"Plotting the graph — hang tight!",
                     "flow_id": data.flow_id,
                     "user_id": user_id,
                     "api_keys": keys_data,
@@ -104,7 +131,7 @@ async def stream_graph(graph: CompiledStateGraph, state: State, flow_id: str):
         chunk_data: State = {
                 "node_data": state.get("node_data"),
                 "response": {
-                            "messages": {"role":"assistant","content":"Query received."},
+                            "messages": {"role":"assistant","content":"Thanks! I’ve got your query and I’m on it."},
                             "meta": {},
                             "type": "",
                             "links_to_open":state.get("response").get("links_to_open")

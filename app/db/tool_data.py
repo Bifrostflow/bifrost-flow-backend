@@ -39,9 +39,10 @@ tools_data: dict[str, ToolModel] = {
         key_name=OPEN_AI_KEY,
         input_type="none",
         object_schema=None,
-        ui_loaded_message="Classification complete.",
-        ui_loading_message="Preparing for next tool.",
-        ui_loaded_message_error="Failed while selecting next tool"
+  ui_loading_message = "Preparing the next tool...",
+ui_loaded_message = "Classification completed.",
+ui_loaded_message_error = "Failed to select the next tool."
+
     ),
     "684a08e28f7c63eb043302d1": ToolModel(
         id="684a08e28f7c63eb043302d1",
@@ -57,9 +58,10 @@ tools_data: dict[str, ToolModel] = {
         key_name=OPEN_AI_KEY,
         input_type="none",
         object_schema=None,
-        ui_loaded_message="Code Evaluation complete.",
-        ui_loaded_message_error="Failed to evauate code.",
-        ui_loading_message="Evaluationg code.",
+ ui_loading_message = "Evaluating code...",
+ui_loaded_message = "Code evaluation completed.",
+ui_loaded_message_error = "Failed to evaluate code."
+
     ),
     "684a0a2a14df3de4f4f6845d": ToolModel(
         id="684a0a2a14df3de4f4f6845d",
@@ -75,9 +77,10 @@ tools_data: dict[str, ToolModel] = {
         key_name=OPEN_AI_KEY,
         input_type="none",
         object_schema=None,
-        ui_loaded_message="Completed generating text.",
-        ui_loaded_message_error="Failed while generting text.",
-        ui_loading_message="Generating text."
+ ui_loading_message = "Generating text...",
+ui_loaded_message = "Text generation completed.",
+ui_loaded_message_error = "Failed to generate text."
+
     ),
     "684a0afa8e798279e19a3e6d": ToolModel(
         id="684a0afa8e798279e19a3e6d",
@@ -93,9 +96,10 @@ tools_data: dict[str, ToolModel] = {
         key_name="gmail",
         input_type="none",
         object_schema=None,
-        ui_loaded_message="Mail sent.",
-        ui_loaded_message_error="Failed while sending mail.",
-        ui_loading_message="sending."
+ui_loading_message = "Sending email...",
+ui_loaded_message = "Email sent successfully.",
+ui_loaded_message_error = "Failed to send email."
+
     ),
     "684a0c5df84f78f814367574": ToolModel(
         id="684a0c5df84f78f814367574",
@@ -111,9 +115,10 @@ tools_data: dict[str, ToolModel] = {
         key_name=OPEN_AI_KEY,
         input_type="none",
         object_schema=None,
-        ui_loaded_message="Code generated.",
-        ui_loaded_message_error="Failed to generate code.",
-        ui_loading_message="Generating code."
+ui_loading_message = "Generating code...",
+ui_loaded_message_error = "Code generation failed.",
+ui_loaded_message = "Code generated successfully!"
+
     ),
     "684d858808dca10a34a65a53": ToolModel(
         id="684d858808dca10a34a65a53",
@@ -129,9 +134,10 @@ tools_data: dict[str, ToolModel] = {
         key_name=None,
         input_type="none",
         object_schema=None,
-        ui_loaded_message="Finished setup.",
-        ui_loaded_message_error="Failed while starting.",
-        ui_loading_message="Setting-up graph."
+ui_loading_message = "Setting up the graph...",
+ui_loaded_message_error = "Setup failed to start.",
+ui_loaded_message = "Graph setup completed successfully!"
+
     ),
     "686a060b7493977b931934c3": ToolModel(
         id="686a060b7493977b931934c3",
@@ -147,9 +153,10 @@ tools_data: dict[str, ToolModel] = {
         key_name=None,
         input_type="none",
         object_schema=None,
-        ui_loaded_message="Finished setup.",
-        ui_loaded_message_error="Failed while starting.",
-        ui_loading_message="Setting up graph."
+        ui_loading_message = "Setting up the graph...",
+ui_loaded_message_error = "Failed to start setup.",
+ui_loaded_message = "Setup completed successfully!"
+
     ),
     "684d8a5608dca10a34a65a55": ToolModel(
         id="684d8a5608dca10a34a65a55",
@@ -165,9 +172,10 @@ tools_data: dict[str, ToolModel] = {
         key_name=None,
         input_type="none",
         object_schema=None,
-        ui_loaded_message="Redirection complete.",
-        ui_loaded_message_error="Failed while redirecting.",
-        ui_loading_message="Redirection to tool."
+ui_loading_message = "Redirecting to the tool...",
+ui_loaded_message_error = "Redirection failed.",
+ui_loaded_message = "Successfully redirected to the tool!"
+
     ),
     "684e733dc2b59ec01fb72c77": ToolModel(
         id="684e733dc2b59ec01fb72c77",
@@ -183,9 +191,10 @@ tools_data: dict[str, ToolModel] = {
         key_name=None,
         input_type="none",
         object_schema=None,
-        ui_loaded_message="Flow Finished.",
-        ui_loaded_message_error="Failed while finishing.",
-        ui_loading_message="Finishing flow."
+ui_loading_message = "Finalizing the flow...",
+ui_loaded_message_error = "An error occurred while finishing the flow.",
+ui_loaded_message = "Flow finalized successfully!"
+
     ),
     "6853a91c8ed701f2efcd6fd1": ToolModel(
         id="6853a91c8ed701f2efcd6fd1",
@@ -201,9 +210,10 @@ tools_data: dict[str, ToolModel] = {
         key_name=OPEN_AI_KEY,
         input_type="none",
         object_schema=None,
-        ui_loading_message="Code documantation started.",
-        ui_loaded_message_error="Failed documenting code.",
-        ui_loaded_message="Code doumentation completed.",
+        ui_loading_message = "Generating code documentation...",
+ui_loaded_message_error = "Failed to generate code documentation.",
+ui_loaded_message = "Code documentation completed successfully!"
+
     ),
     "6853c80d8ed701f2efcd6fd2": ToolModel(
         id="6853c80d8ed701f2efcd6fd2",
@@ -219,9 +229,10 @@ tools_data: dict[str, ToolModel] = {
         key_name="",
         input_type="none",
         object_schema=None,
-        ui_loading_message="Preparing PDF document.",
-        ui_loaded_message_error="Failed hile converting.",
-        ui_loaded_message="Convertation completed.",
+ui_loading_message = "Preparing your PDF document...",
+ui_loaded_message_error = "Oops! Something went wrong during conversion.",
+ui_loaded_message = "PDF converted successfully!"
+
     ),
     "68585eca3aa24f736ddb2a59": ToolModel(
         id="68585eca3aa24f736ddb2a59",
@@ -237,9 +248,10 @@ tools_data: dict[str, ToolModel] = {
         key_name="tavily",
         input_type="string",
         object_schema=None,
-        ui_loading_message="Search started.",
-        ui_loaded_message_error="Failed while searching.",
-        ui_loaded_message="Search completed.",
+     ui_loading_message = "Searching...",
+ui_loaded_message_error = "Oops! Something went wrong during the search.",
+ui_loaded_message = "Search completed successfully!"
+
     ),
     "6866c9cf9f3b944d6d0f9935": ToolModel(
         id="6866c9cf9f3b944d6d0f9935",
@@ -255,9 +267,10 @@ tools_data: dict[str, ToolModel] = {
         key_name=OPEN_AI_KEY,
         input_type="none",
         object_schema=None,
-        ui_loading_message="Started writing script.",
-        ui_loaded_message_error="Failed while wworking on script.",
-        ui_loaded_message="Finised writing script.",
+     ui_loading_message = "Writing your script...",
+ui_loaded_message_error = "Oops! Something went wrong while generating the script.",
+ui_loaded_message = "Script completed successfully!"
+
     ),
     "686915a6acd2b4a126714ec3": ToolModel(
         id="686915a6acd2b4a126714ec3",
@@ -273,26 +286,27 @@ tools_data: dict[str, ToolModel] = {
         key_name="",
         input_type="none",
         object_schema=None,
-        ui_loading_message="Searching for latest trend.",
-        ui_loaded_message_error="Failed while looking for trends.",
-        ui_loaded_message="Top Trend found.",
+ui_loading_message = "Scanning for the latest trends...",
+ui_loaded_message_error = "Oops! Couldn't fetch the trends.",
+ui_loaded_message = "Here's the top trend we found!",
+
     ),
-    "686a027e7493977b931934c2": ToolModel(
-        id="686a027e7493977b931934c2",
-        name="Create Tweet",
-        type="create_tweet",
-        gpt_model="gpt-4.1",
+    "68761d62027f5fe62f9c7fdd": ToolModel(
+        id="68761d62027f5fe62f9c7fdd",
+        name="On Speech",
+        type="on_speech",
+        gpt_model="whisper-1",
         llm=OPEN_AI_KEY,
-        description="Write/Generate tweet based on provided data in prompt or based on past response.",
-        what_i_do="Check if the provided prompt satisfies this type 'create_tweet' if yes return type as 'create_tweet' else ignore this tool, create_tweet can help user to generate tweet based on past meta or response",
-        category="generate",
+        description = "Convert user audio into text and pass it to the next...",
+        what_i_do="Check if the provided prompt satisfies this type 'on_speech' if yes return type as 'on_speech' else ignore this tool.",
         state="active",
+        category="initiate",
         require_key=True,
         key_name=OPEN_AI_KEY,
         input_type="none",
         object_schema=None,
-        ui_loading_message="Preparing tweet.",
-        ui_loaded_message_error="Failed generating tweet.",
-        ui_loaded_message="Tweet generated.",
+        ui_loading_message = "Listening...",
+        ui_loaded_message_error = "Sorry, I didn't catch that.",
+        ui_loaded_message = "Got it!",
     ),
 }
