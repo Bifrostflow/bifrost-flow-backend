@@ -62,7 +62,7 @@ app.add_middleware(
     allow_origins=[
         "https://bifrostflow.com/",
         "bifrostflow.com/",
-        "https://localhost:3000",
+        os.getenv("LOCALHOST"),
     ],
     allow_credentials=True,
     allow_methods=["*"],
