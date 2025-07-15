@@ -23,7 +23,6 @@ class ToolModel(BaseModel):
     ui_loaded_message_error:str
 
 
-
 tools_data: dict[str, ToolModel] = {
     "684a054b6c981a601e166627": ToolModel(
         id="684a054b6c981a601e166627",
@@ -308,5 +307,23 @@ ui_loaded_message = "Here's the top trend we found!",
         ui_loading_message = "Listening...",
         ui_loaded_message_error = "Sorry, I didn't catch that.",
         ui_loaded_message = "Got it!",
+    ),
+      "686a027e7493977b931934c2": ToolModel(
+        id="686a027e7493977b931934c2",
+        name="Create Tweet",
+        type="create_tweet",
+        gpt_model="gpt-4.1",
+        llm=OPEN_AI_KEY,
+        description="Write/Generate tweet based on provided data in prompt or based on past response.",
+        what_i_do="Check if the provided prompt satisfies this type 'create_tweet' if yes return type as 'create_tweet' else ignore this tool, create_tweet can help user to generate tweet based on past meta or response",
+        category="generate",
+        state="active",
+        require_key=True,
+        key_name=OPEN_AI_KEY,
+        input_type="none",
+        object_schema=None,
+        ui_loading_message = "Preparing tweet...",
+ui_loaded_message_error = "Failed to generate tweet.",
+ui_loaded_message = "Tweet successfully generated."
     ),
 }
