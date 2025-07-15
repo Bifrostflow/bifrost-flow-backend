@@ -109,7 +109,7 @@ async def create_graph(nodes: List[Node]) -> CompiledStateGraph:
         print("===>", req)
         node_type = req.get("node_type")
 
-        is_start = node_type == "on_prompt" or node_type == "on_start"
+        is_start = node_type in ["on_prompt", "on_start", "on_speech"]
         is_conditional = req.get("flow_type") == "conditional"
         next_edge_graph_id = node.get("next_node_id")[0]
         next_edge_db_id = next_edge_graph_id.split("-")[1]
