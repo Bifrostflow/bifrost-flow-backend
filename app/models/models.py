@@ -35,6 +35,7 @@ class GraphData(BaseModel):
     data: List[UserEdge]
     input: str
     flow_id: str
+    enable_checkpointing:bool
 
 
 class Node(TypedDict):
