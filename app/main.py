@@ -1,8 +1,7 @@
-import datetime
 import os
 
 from clerk_backend_api import Clerk
-from fastapi import FastAPI, Depends, File, Form, HTTPException, UploadFile
+from fastapi import FastAPI, Depends, File, Form, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 from fastapi_clerk_auth import (
@@ -12,7 +11,6 @@ from fastapi_clerk_auth import (
 )
 from openai import OpenAI
 from pydantic import BaseModel
-import razorpay
 import requests
 from supabase import SupabaseException
 from jose import jwt
@@ -26,8 +24,11 @@ from app.controllers.flow import (
 from app.controllers.get_system_node_by_id import use_get_system_node_by_id
 from app.controllers.get_system_nodes import use_get_system_nodes
 from app.controllers.get_templates import use_get_template_by_id, use_get_templates
-from app.controllers.run_flow import check_bollaborator_access, get_user_keys, use_run_flow
-from app.controllers.supabase_auth.create_payment import Payment, SupabasePayment, create_supabase_payment, update_supabase_payment
+
+from app.controllers.payments.create_order import create_order_controller
+from app.controllers.payments.verify_payment import verify_payment_controller
+from app.controllers.run_flow import check_collaborator_access, get_user_keys, use_run_flow
+
 from app.controllers.supabase_auth.create_project import (
     create_supabase_project,
     get_supabase_projects,
@@ -41,10 +42,10 @@ from app.controllers.supabase_auth.create_user import (
     create_supabase_user,
     check_user_exist,
 )
+from app.models.payment_models import PaymentVerificationRequest, TemplateOrderRequest
 from app.models.projects import Project, EditProject, UpdateFlowGraph, UpdateFlowKeys
 from app.models.response import APIResponse
-import hmac
-import hashlib
+
 
 from app.utils.constants import OPEN_AI_KEY
 
@@ -255,7 +256,7 @@ async def transcribe_audio(flow_id:str= Form(...),audio: UploadFile = File(...),
                 isSuccess=False, message="Authorization failed.", data=None, error=None
             )
             return res
-    has_access=await check_bollaborator_access(user_id=user_id,flow_id=flow_id)
+    has_access=await check_collaborator_access(user_id=user_id,flow_id=flow_id)
     if not has_access:
         res = APIResponse(
                 isSuccess=False, message="Access denied.", data=None, error=None
@@ -319,117 +320,10 @@ async def update_user(user:ClerkUser,credentials: HTTPAuthorizationCredentials |
                 isSuccess=True, message="User details updated.", data=user,error=None
             )
 
-# payments
-
-# @app.get("/test-payments")
-# async def test_payment():
-
-class OrderRequest(BaseModel):
-    amount: int 
-    currency: str 
-    receipt: str 
-
 @app.post("/create-order")
-async def create_order(data: OrderRequest,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
-    try:
-        jwks_url = os.getenv("JWKS")
-        jwks = requests.get(jwks_url).json()
-        token_data = jwt.decode(credentials.credentials, jwks, algorithms=["RS256"])
-        user_id = token_data["sub"]
-        exist = check_user_exist(jwks, credentials.credentials)
-        if not exist.isExist:
-            res = APIResponse(
-                isSuccess=False, message="User not exist", data=None, error=None
-            )
-            return res
-        # check if same user is creating payment
-        if user_id != f"user_{data.receipt.split("_")[1]}":
-            # print(user_id,f"user_{data.receipt.split("_")[1]}")
-            res = APIResponse(
-                    isSuccess=False,
-                    message="Access denied.",
-                    data=None,
-                    error=None,
-                )
-            return res
-        payment=SupabasePayment(receipt_id=data.receipt)
-        # print("cndition pass 308",payment)
-        order_response=create_supabase_payment(jwks, credentials.credentials,payment )
-        # print("order_response: ",order_response)
-        if not order_response.isSuccess:
-
-            res = APIResponse(
-                    isSuccess=False,
-                    message=order_response.message or "Failed to create order.",
-                    data=None,
-                    error=None,
-                )
-            return res
-        razorpay_client = razorpay.Client(auth=(os.getenv("RAZORPAY_API_KEY"), os.getenv("RAZORPAY_API_SECRET_KEY")))
-        razorpay_client.set_app_details({"title" : "bifrost flow", "version" : "0.1.0"})
-        order = razorpay_client.order.create({
-            "amount": data.amount,
-            "currency": data.currency,
-            "receipt": data.receipt,
-            "payment_capture": 1
-        })
-        return APIResponse(data={
-            "order_id": order["id"],
-            "key_id": os.getenv("RAZORPAY_API_KEY"),
-            "receipt_id":data.receipt
-        },error=None,isSuccess=True,message="Order Created.")
-    except Exception as e:
-        # print(str(e))
-        return APIResponse(data=None,error=None,isSuccess=False,message=str(e))
-class PaymentVerificationRequest(BaseModel):
-    order_id: str
-    payment_id: str
-    signature: str
-    receipt_id:str
+async def create_order(data: TemplateOrderRequest,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
+    return await create_order_controller(data,credentials.credentials)
 
 @app.post("/verify-payment")
 async def verify_payment(data: PaymentVerificationRequest,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
-    generated_signature = hmac.new(
-        os.getenv("RAZORPAY_API_SECRET_KEY").encode(),
-        f"{data.order_id}|{data.payment_id}".encode(),
-        hashlib.sha256
-    ).hexdigest()
-
-    if generated_signature == data.signature:
-        jwks_url = os.getenv("JWKS")
-        jwks = requests.get(jwks_url).json()
-        token_data = jwt.decode(credentials.credentials, jwks, algorithms=["RS256"])
-        user_id = token_data["sub"]
-        if user_id != f"user_{data.receipt_id.split("_")[1]}":
-            # print(user_id,f"user_{data.receipt_id.split("_")[1]}")
-            res = APIResponse(
-                    isSuccess=False,
-                    message="Access denied.",
-                    data=None,
-                    error=None,
-                )
-            return res
-        exist = check_user_exist(jwks, credentials.credentials)
-        if not exist:
-            res = APIResponse(
-                isSuccess=False, message="User not exist", data=None, error=None
-            )
-            return res
-        razorpay_client = razorpay.Client(auth=(os.getenv("RAZORPAY_API_KEY"), os.getenv("RAZORPAY_API_SECRET_KEY")))
-        razorpay_client.set_app_details({"title" : "bifrost flow", "version" : "0.1.0"})
-        payment = razorpay_client.payment.fetch(data.payment_id)
-        # print("payment:: ",payment)
-        supabase_payment=Payment(receipt=data.receipt_id,
-                                 amount=float(payment["amount"]),
-                                 order_id=payment["order_id"],
-                                 order_type="product",
-                                 payment_id=data.payment_id,
-                                status=payment["status"],
-                                timestamp=payment["created_at"]
-                                 )
-        supabase_order_update_res=update_supabase_payment(jwks=jwks,token=credentials.credentials,payment=supabase_payment)
-        if supabase_order_update_res.isSuccess:
-            return APIResponse(data={"status":payment["status"]},error=None,isSuccess=True,message="Order created successfully, thanks for using our marketplace.")
-        return APIResponse(data=None,error=None,isSuccess=True,message=supabase_order_update_res.message)
-    else:
-        raise HTTPException(status_code=400, detail="Invalid payment signature")
+    return await verify_payment_controller(data,credentials.credentials)
