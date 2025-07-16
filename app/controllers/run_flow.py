@@ -31,7 +31,7 @@ async def get_user_keys(flow_id:str,user_id:str):
     )
     return keys_data
 
-async def check_bollaborator_access(flow_id:str,user_id:str):
+async def check_collaborator_access(flow_id:str,user_id:str):
         collaborators_data = (
                 super_supabase.table("flows")
                 .select("users")
