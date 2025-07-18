@@ -30,4 +30,28 @@ async def update_user_controller(user:ClerkUser,token:str):
         return APIResponse(
                     isSuccess=False, message=e.data.errors[0].long_message, data=user,error=None
                 )
+
+def update_user_role_controller(user:ClerkUser,token:str,role:str="mortal"):
+    jwks_url = os.getenv("JWKS")
+    jwks = requests.get(jwks_url).json()
+    token_data = jwt.decode(token, jwks, algorithms=["RS256"])
+    user_id = token_data["sub"]
+    if not user_id:
+        res = APIResponse(
+                isSuccess=False, message="Authorization failed.", data=None, error=None
+            )
+        return res
+    clerk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
+
+    try:
+        user = clerk.users.update(user_id=user_id,public_metadata={
+  "plan": role
+})
+        return APIResponse(
+                    isSuccess=True, message="User details updated.", data=user,error=None
+                )
+    except ClerkErrors as e:
+        return APIResponse(
+                    isSuccess=False, message=e.data.errors[0].long_message, data=user,error=None
+                )
         
