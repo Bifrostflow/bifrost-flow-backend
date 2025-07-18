@@ -2,6 +2,7 @@ from jose import jwt
 from pydantic import BaseModel
 from supabase import SupabaseException
 
+from app.controllers.user.update_user import update_user_role_controller
 from app.db.supa_base import super_supabase
 from app.models.response import APIResponse
 
@@ -23,6 +24,7 @@ def create_supabase_user(jwks:any,token:str)->APIResponse:
         return res
     try:
         super_supabase.table("users").insert(({"clerk_id":user_id,"email":email})).execute()
+        update_user_role_controller(user_id,token)
         res = APIResponse(isSuccess=True, message="User created Successfully.", data=None, error=None)
         return res
     except SupabaseException as e:
