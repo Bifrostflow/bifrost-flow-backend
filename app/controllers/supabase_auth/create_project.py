@@ -1,4 +1,6 @@
 from datetime import datetime, timezone
+import os
+from clerk_backend_api import Clerk
 from fastapi import HTTPException
 from jose import jwt
 from pydantic import Base64Encoder
@@ -18,10 +20,14 @@ from app.models.response import APIResponse
 from app.utils import fallback_snap
 from app.utils.projct_name_genrator import generate_norse_project_name
 
-def subscription_plan_limit(plan: str) -> int:
+def subscription_plan_limit(user_id:str) -> int:
+
     """
     Returns the project limit based on the user's subscription plan.
     """
+    clerk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
+    user = clerk.users.get(user_id=user_id)
+    plan=user.public_metadata.get("plan")
     plan_limits = {
         "mortal": 5,
         "demigod": 20,
@@ -42,14 +48,8 @@ def create_supabase_project(jwks: any, token: str, project: Project) -> APIRespo
         # print(exist.isExist)
         if exist.isExist:
             # Check if the user has reached their project limit
-            user_data = (
-                super_supabase.table("users")
-                .select("user_plan")
-                .eq("clerk_id", user_id)
-                .execute()
-            )
-            plan = user_data.data[0].get("user_plan")
-            project_limit = subscription_plan_limit(plan)
+          
+            project_limit = subscription_plan_limit(user_id)
             current_project_count = len((
                 super_supabase.table("flows")
                 .select("id")
@@ -213,17 +213,7 @@ def get_supabase_projects(jwks: any, token: str) -> APIResponse:
                 isSuccess=False, message="Authorization failed.", data=None, error=None
             )
             return res
-        user_data = (
-            super_supabase.table("users").select("user_plan").eq("clerk_id", user_id).execute()
-        )
-        plan=user_data.data[0].get("user_plan")
-        project_limit=0
-        if plan=="mortal":
-            project_limit=5
-        elif plan=="demigod":
-            project_limit=20
-        elif plan=="deity":
-            project_limit=50
+        project_limit = subscription_plan_limit(user_id)
         
         data = (
             super_supabase.table("flows")

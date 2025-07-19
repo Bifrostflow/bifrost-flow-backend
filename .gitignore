@@ -57,3 +57,4 @@ docker-compose.override.yml
 *.bak
 *.orig
 .env.dev
+think-tank.txt
