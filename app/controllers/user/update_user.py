@@ -33,12 +33,10 @@ async def update_user_controller(user:ClerkUser,token:str):
 
 def update_user_role_controller(user_id:str,role:str="mortal"):
     clerk = Clerk(bearer_auth=os.getenv("CLERK_SECRET_KEY"))
-
     try:
-        
         user = clerk.users.update(user_id=user_id,public_metadata={
-  "plan": role
-})
+            "plan": role
+            })
         return APIResponse(
                     isSuccess=True, message="User details updated.", data=user,error=None
                 )
