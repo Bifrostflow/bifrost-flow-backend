@@ -248,6 +248,14 @@ class TemplateDB:
             template for template in templates.values() if template.visibility == state
         ]
 
+    def get_by_product_id(
+        self, product_id:str
+    ) -> List[FlowTemplate]:
+        templates = self._load_templates()
+        return [
+            template for template in templates.values() if template.product_id == product_id
+        ]
+
     def get_by_category(
         self,
         category: Literal[

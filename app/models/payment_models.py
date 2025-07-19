@@ -8,6 +8,5 @@ class PaymentVerificationRequest(BaseModel):
     receipt_id:str
 
 class TemplateOrderRequest(BaseModel):
-    amount: int 
     currency: str 
     receipt: str 

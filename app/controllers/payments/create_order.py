@@ -6,11 +6,16 @@ from app.controllers.supabase_auth.create_payment import  SupabasePayment, creat
 from app.controllers.supabase_auth.create_user import (check_user_exist)
 from app.models.payment_models import TemplateOrderRequest
 from app.models.response import APIResponse
+from app.db.template_data import template_db
 
 NO_ACCESS="Access denied."
 NO_USER="User not exist"
 ORDER_SUCCESS="Order created"
 ORDER_FAILED="Failed to create order."
+
+def dollarToPaisa (amountDlr: int):
+    dlrToRupee = amountDlr * 86
+    return dlrToRupee * 100
 
 async def create_order_controller(data: TemplateOrderRequest,token:str):
     try:
@@ -49,8 +54,10 @@ async def create_order_controller(data: TemplateOrderRequest,token:str):
             return res
         RAZORPAY_API_KEY=os.getenv("RAZORPAY_API_KEY")
         razor_pay = razorpay_client()
+        template_product_id=data.receipt.split("_")[0]
+        amount=template_db.get_by_product_id(template_product_id)[0].price
         order = razor_pay.order.create({
-            "amount": data.amount,
+            "amount": dollarToPaisa(amount),
             "currency": data.currency,
             "receipt": data.receipt,
             "payment_capture": 1
@@ -61,4 +68,5 @@ async def create_order_controller(data: TemplateOrderRequest,token:str):
             "receipt_id":data.receipt
         },error=None,isSuccess=True,message=ORDER_SUCCESS)
     except Exception as e:
+        print(e)
         return APIResponse(data=None,error=None,isSuccess=False,message=str(e))
