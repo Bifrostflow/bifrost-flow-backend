@@ -24,7 +24,7 @@ def create_supabase_user(jwks:any,token:str)->APIResponse:
         return res
     try:
         super_supabase.table("users").insert(({"clerk_id":user_id,"email":email})).execute()
-        update_user_role_controller(user_id,token)
+        update_user_role_controller(user_id=user_id)
         res = APIResponse(isSuccess=True, message="User created Successfully.", data=None, error=None)
         return res
     except SupabaseException as e:

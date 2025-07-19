@@ -56,3 +56,4 @@ docker-compose.override.yml
 # Others
 *.bak
 *.orig
+.env.dev
