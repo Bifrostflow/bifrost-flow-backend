@@ -23,9 +23,12 @@ from app.controllers.flow import (
 from app.controllers.get_system_node_by_id import use_get_system_node_by_id
 from app.controllers.get_system_nodes import use_get_system_nodes
 from app.controllers.get_templates import use_get_template_by_id, use_get_templates
-
+from app.controllers.payments.cancel_plan import cancel_plan
+from  app.db.supa_base import super_supabase
 from app.controllers.payments.create_order import create_order_controller
+from app.controllers.payments.start_subscription_controller import start_subscription_controller
 from app.controllers.payments.verify_payment import verify_payment_controller
+from app.controllers.payments.verify_subscription import VerifySub, verify_subscription_controller
 from app.controllers.run_flow import use_run_flow
 
 from app.controllers.supabase_auth.create_project import (
@@ -268,3 +271,25 @@ async def create_order(data: TemplateOrderRequest,credentials: HTTPAuthorization
 @app.post("/verify-payment")
 async def verify_payment(data: PaymentVerificationRequest,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
     return await verify_payment_controller(data,credentials.credentials)
+
+@app.post("/start-subscription")
+async def start_subscription(plan_id: str,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
+    return await start_subscription_controller(plan=plan_id,token=credentials.credentials)
+
+@app.post("/verify-subscription")
+async def verify_subscription(data: VerifySub,credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
+    return await verify_subscription_controller(data,credentials.credentials)
+
+@app.post("/cancel-plan")
+async def verify_subscription(credentials: HTTPAuthorizationCredentials | None = Depends(clerk_auth_guard)):
+    return await cancel_plan(credentials.credentials)
+
+@app.post("/webhook")
+def razorpay_webhook(payload: dict):
+    if payload["event"] == "subscription.activated":
+        sub = payload["payload"]["subscription"]["entity"]
+        super_supabase.table("subscriptions").update({
+            "stat_at": sub["current_start"],
+            "end_at": sub["current_end"],
+            "status": "active"
+        }).eq("sub_id", sub["id"]).execute()
