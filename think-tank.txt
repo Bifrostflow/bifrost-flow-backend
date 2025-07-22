@@ -18,3 +18,11 @@ user: ASSISTANT_PROMPT(TOOL_SPECIFIC) --temp
 State will manage
 PREV_ASSISTANT_MESSAGE (LAST MESSAGE)
 USER_PROMPT (will be there from start)
+
+
+ How to Run FLow remotely
+ we need edges id
+ based on that edge_id and owner_user_id we can generate a API Secret key
+ that secret key can be used to call flow from anywhere
+ but this remote flows will not run on same server as our app's
+ and we can let users self host this server too
