@@ -1,11 +1,6 @@
 import json
-from typing import List
-from openai.types.chat import (
-    ChatCompletionUserMessageParam,
-    ChatCompletionAssistantMessageParam,
-)
 from tavily import TavilyClient
-from app.models.models import State, Response
+from app.models.models import MessageResponse, State, Response
 
 
 def tavily_search(state: State):
@@ -50,9 +45,9 @@ def tavily_search(state: State):
 
     message = result_text
 
-    user_request = ChatCompletionUserMessageParam(role="user", content=f"{node_input}")
+    user_request = MessageResponse(role="user", content=f"{node_input}")
     messages.append(user_request)
-    response_chat_data = ChatCompletionAssistantMessageParam(
+    response_chat_data = MessageResponse(
         role="assistant", content=message
     )
     messages.append(response_chat_data)
