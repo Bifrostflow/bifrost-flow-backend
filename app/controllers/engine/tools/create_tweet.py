@@ -1,15 +1,11 @@
 import json
-from openai import OpenAI
-from openai.types.chat import (
-    ChatCompletionUserMessageParam,
-    ChatCompletionAssistantMessageParam,
-    ChatCompletionSystemMessageParam,
-)
+from langchain_core.messages import HumanMessage,SystemMessage
 
-
+from app.controllers.engine.helpers import load_model_with_key
 from app.models.meta import TweetData
 from app.models.models import (
     LinkToOpen,
+    MessageResponse,
     State,
     Response,
     TweetGenerationData,
@@ -25,7 +21,7 @@ CREATE_TWEET="create_tweet"
 def create_tweet(state: State):
     print("🤖 --- doing write_message", state.get("node_data"))
     user_openai_key = state.get("api_keys").get(OPEN_AI_KEY)
-    client = OpenAI(api_key=user_openai_key)
+    client = load_model_with_key(user_openai_key,"gpt-4.1")
 
     #  Define prompts
     system_prompt = """
@@ -94,31 +90,28 @@ def create_tweet(state: State):
                 """
 
     # Add Chat item
-    tool_chat = ChatCompletionUserMessageParam(
-        role="user",
+    tool_chat = HumanMessage(
         content=f"""
         {tool_prompt}:
         Content
         {prompt}
         """,
     )
-    system_prompt_chat = (
-        ChatCompletionSystemMessageParam(role="system", content=system_prompt),
+    system_prompt_chat = (SystemMessage(content=system_prompt),
     )
 
     # Create chat data
     print("running query", prompt)
     chat_data = ChatHistory(state=state, tool_prompt=tool_chat)
     messages = manage_flow_chat_history(data=chat_data)
-    query_response = client.beta.chat.completions.parse(
-        model="gpt-4.1",
-        messages=[*system_prompt_chat, *messages],
-        response_format=TweetGenerationData,
-    )
-    parsed_response = query_response.choices[0].message.parsed
-    final_tweet.tweet = parsed_response.tweet
 
-    response_chat_data = ChatCompletionAssistantMessageParam(
+    structured_client = client.with_structured_output(TweetGenerationData)
+    query_res=structured_client.invoke([*system_prompt_chat, *messages])
+
+    parsed_response = query_res.model_dump()
+    final_tweet.tweet = parsed_response.get("tweet")
+
+    response_chat_data = MessageResponse(
         role="assistant", content="Tweet generated"
     )
     messages.append(response_chat_data)

@@ -1,13 +1,9 @@
 import json
 from bs4 import BeautifulSoup
 import feedparser
-from openai.types.chat import (
-    ChatCompletionUserMessageParam,
-    ChatCompletionAssistantMessageParam,
-)
 import requests
 from app.models.meta import TrendData
-from app.models.models import State, Response, TrendNews
+from app.models.models import MessageResponse, State, Response, TrendNews
 
 GOOGLE_TRENDS = "google_trends"
 
@@ -95,11 +91,11 @@ async def google_trend(state: State):
 
     # scrapping end
     #
-    user_request = ChatCompletionUserMessageParam(
+    user_request = MessageResponse(
         role="user", content="Provide me top trend topic on google trend"
     )
     messages.append(user_request)
-    response_chat_data = ChatCompletionAssistantMessageParam(
+    response_chat_data = MessageResponse(
         role="assistant", content=message
     )
     messages.append(response_chat_data)

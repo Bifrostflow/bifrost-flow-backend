@@ -1,12 +1,6 @@
 from typing import List
-
-from openai.types.chat import (
-    ChatCompletionUserMessageParam,
-    ChatCompletionAssistantMessageParam,
-)
-
 from app.models.models import Response, ChatHistory
-
+from langchain_core.messages import HumanMessage,AIMessage
 
 # system: SYSTEM_PROMPT --- temp : TOOL
 # user: USER_PROMPT (will be there from start) :STATE
@@ -16,10 +10,10 @@ from app.models.models import Response, ChatHistory
 
 def manage_flow_chat_history(
     data: ChatHistory,
-) -> List[ChatCompletionUserMessageParam | ChatCompletionAssistantMessageParam]:
+) -> List[HumanMessage | AIMessage]:
     response: Response = data.get("state").get("response")
     messages: List[
-        ChatCompletionUserMessageParam | ChatCompletionAssistantMessageParam
+        HumanMessage | AIMessage
     ] = response.get("messages")
     is_untouched_prompt = len(messages) == 1
     if data.get("tool_prompt") and not is_untouched_prompt:
