@@ -11,6 +11,7 @@ build/
 # FastAPI / Uvicorn
 instance/
 .env
+.env.*
 .env.*.local
 *.sqlite3
 
@@ -56,3 +57,6 @@ docker-compose.override.yml
 # Others
 *.bak
 *.orig
+.env.dev
+think-tank.txt
+think-tank.txt

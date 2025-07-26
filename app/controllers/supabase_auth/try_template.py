@@ -48,21 +48,14 @@ def use_try_template(jwks: any, token: str, template_id: str) -> APIResponse:
                     )
                     return res 
              # Check if the user has reached their project limit
-            user_data = (
-                super_supabase.table("users")
-                .select("user_plan")
-                .eq("clerk_id", user_id)
-                .execute()
-            )
-            plan = user_data.data[0].get("user_plan")
-            project_limit = subscription_plan_limit(plan)
+            project_limit = subscription_plan_limit(user_id)
             current_project_count = len((
                 super_supabase.table("flows")
                 .select("id")
                 .eq("user_id", user_id)
                 .execute()
             ).data)
-            print("Current project count:", current_project_count)
+            # print("Current project count:", current_project_count)
             if current_project_count >= project_limit:
                 res = APIResponse(
                     isSuccess=False,

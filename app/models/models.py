@@ -1,18 +1,18 @@
 from typing import List, Literal, Optional
 
-from openai.types.chat import (
-    ChatCompletionAssistantMessageParam,
-    ChatCompletionUserMessageParam,
-)
+
 from pydantic import BaseModel, Field
 from typing_extensions import TypedDict
-
+from langchain_core.messages import HumanMessage,AIMessage
 
 class CreateFlow(BaseModel):
     name: str = Field(..., min_length=2, max_length=20)
     description: str = Field(..., min_length=2, max_length=100)
     data: str  # JSON stringify
 
+class MessageResponse(TypedDict):
+    role:Literal["assistant","system",'human', 'user', 'ai',  'function', 'tool', 'system', 'developer']
+    content:str
 
 class CreateNode(BaseModel):
     name: str = Field(..., min_length=2, max_length=20)
@@ -54,16 +54,16 @@ class LinkToOpen(TypedDict):
     type:str
 
 class Response(TypedDict):
-    messages: List[ChatCompletionUserMessageParam | ChatCompletionAssistantMessageParam]
+    messages: List[MessageResponse]
     type: str | None
     meta: List[str]
     links_to_open:List[LinkToOpen]
 
 
-class ResponseModel(BaseModel):
-    type: str
-    prefix: int
-    message:str
+class ClassifyRouteMessageClassification(BaseModel):
+    type: str=Field(description="`type` of next tool based on provided `prefixed_type` value.")
+    prefix: int=Field(description="`prefix` number based on provided `node_id_prefix` value.")
+    message:str=Field(description="Generate a human readable message without any detail about tool or prefix just a generate message like ")
 
 
 class NodeData(TypedDict):
@@ -87,8 +87,8 @@ class UserMessage(TypedDict):
 
 class ChatHistory(TypedDict):
     state: State
-    tool_prompt: None | ChatCompletionUserMessageParam
-    user_prompt: None | ChatCompletionUserMessageParam
+    tool_prompt: None | HumanMessage
+    user_prompt: None | HumanMessage
 
 
 class TrendNews(TypedDict):
@@ -102,7 +102,7 @@ class TrendNews(TypedDict):
 
 
 class TweetGenerationData(BaseModel):
-    tweet: str
+    tweet: str=Field(description="generated tweet based on provided values.")
 
 class ClerkUser(BaseModel):
     first_name:str

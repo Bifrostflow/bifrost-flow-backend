@@ -1,13 +1,15 @@
+import os
 from dotenv import load_dotenv
 from openai import OpenAI
-from openai.types.chat import (
-    ChatCompletionUserMessageParam,
-    ChatCompletionAssistantMessageParam,
-    ChatCompletionSystemMessageParam,
-)
+# from openai.types.chat import (
+#     ChatCompletionUserMessageParam,
+#     ChatCompletionAssistantMessageParam,
+#     ChatCompletionSystemMessageParam,
+# )
 from typing import List
+from app.controllers.engine.helpers import load_model_with_key
 from app.controllers.get_system_node_by_id import get_node_ui_loading_message
-from app.models.models import State, Response, ResponseModel
+from app.models.models import ClassifyRouteMessageClassification, MessageResponse, State, Response
 from app.db.jsonDB import tools_db
 
 # CLASSIFY_MESSAGE = "classify_message"
@@ -17,7 +19,9 @@ CLASSIFY_MESSAGE = "684a054b6c981a601e166627"
 async def classify_message(state: State):
     print("🤖 --- doing classification", state.get("node_data"))
     load_dotenv()
-    client = OpenAI()
+    default_open_ai_key=os.getenv("OPENAI_API_KEY")
+    client = load_model_with_key(default_open_ai_key,"gpt-4.1-nano")
+    # client = OpenAI()
 
     next_nodes = state.get("node_data").get("next_nodes")
     print("next_nodes: ", next_nodes)
@@ -72,24 +76,19 @@ Be strict, precise, and deterministic.
         """
 
     messages: List[
-        ChatCompletionSystemMessageParam
-        | ChatCompletionUserMessageParam
-        | ChatCompletionAssistantMessageParam
+        MessageResponse
     ] = [
-        ChatCompletionSystemMessageParam(role="system", content=system_prompt),
-        ChatCompletionUserMessageParam(role="user", content=user_message),
+        MessageResponse(role="system", content=system_prompt),
+        MessageResponse(role="user", content=user_message),
     ]
 
-    query_res = client.beta.chat.completions.parse(
-        model="gpt-4.1-nano",
-        response_format=ResponseModel,
-        messages=messages,
-    )
-    parsed_response=query_res.choices[0].message.parsed
-    prompt_type = parsed_response.type
+    structured_client = client.with_structured_output(ClassifyRouteMessageClassification)
+    query_res=structured_client.invoke(messages)
+    parsed_response=query_res.model_dump()
+    prompt_type = parsed_response.get("type")
     sanitized_prompt_type=prompt_type.split("-")[-1]
-    response_message=ChatCompletionAssistantMessageParam(role="assistant",content=parsed_response.message)
-    prompt_prefix = parsed_response.prefix
+    response_message=MessageResponse(role="assistant",content=parsed_response.get("message"))
+    prompt_prefix = parsed_response.get("prefix")
     
     route_id = f"{prompt_prefix}-{sanitized_prompt_type}"
     print(route_id)

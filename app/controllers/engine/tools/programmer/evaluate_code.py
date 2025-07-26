@@ -1,13 +1,9 @@
 import json
 
-from openai import OpenAI
-from openai.types.chat import (
-    ChatCompletionUserMessageParam,
-    ChatCompletionAssistantMessageParam,
-    ChatCompletionSystemMessageParam,
-)
+from langchain_core.messages import HumanMessage,SystemMessage
+from app.controllers.engine.helpers import load_model_with_key
 from app.models.meta import EvaluateCodeModel
-from app.models.models import Response, State
+from app.models.models import MessageResponse, Response, State
 from app.controllers.engine.tools.tools_helpers.manage_messages import (
     ChatHistory,
     manage_flow_chat_history,
@@ -21,7 +17,7 @@ def evaluate_code(state: State):
     print("🤖 --- doing evaluate_code", state.get("node_data"))
 
     user_openai_key = state.get("api_keys").get(OPEN_AI_KEY)
-    client = OpenAI(api_key=user_openai_key)
+    client = load_model_with_key(user_openai_key,"gpt-4.1-mini")
 
     #  Define prompts
     system_prompt = """
@@ -35,34 +31,32 @@ def evaluate_code(state: State):
     tool_prompt = "evaluate provided code"
     generated_code = state.get("response").get("messages")[-1].get("content")
     # Add Chat item
-    tool_chat = ChatCompletionUserMessageParam(role="user", content=tool_prompt)
+    tool_chat = HumanMessage(role="user", content=tool_prompt)
     system_prompt_chat = (
-        ChatCompletionSystemMessageParam(role="system", content=system_prompt),
+        SystemMessage(role="system", content=system_prompt),
     )
 
     # Create chat data
     chat_data = ChatHistory(state=state, tool_prompt=tool_chat)
     messages = manage_flow_chat_history(data=chat_data)
 
-    query_res = client.beta.chat.completions.parse(
-        model="gpt-4.1-mini",
-        response_format=EvaluateCodeModel,
-        messages=[*system_prompt_chat, *messages],
-    )
+    structured_client = client.with_structured_output(EvaluateCodeModel)
+    query_res=structured_client.invoke([*system_prompt_chat, *messages])
     # manage parsed response
-    parsedResponse = query_res.choices[0].message.parsed
-    parsedResponse.type = EVALUATE_CODE
-    parsedResponse.node_id = state.get("node_data").get("node_graph_id")
-    parsedResponse.code = generated_code
+    parsedResponse = query_res.model_dump()
+    parsedResponse["type"] = EVALUATE_CODE
+    parsedResponse["node_id"] = state.get("node_data").get("node_graph_id")
+    parsedResponse["code"] = generated_code
 
-    meta = parsedResponse.model_dump()
-
+    meta = parsedResponse
+    print("META: ",meta)
     # manage parsed response remark
     message = ""
-    if parsedResponse.remark:
-        message = parsedResponse.remark
+    if parsedResponse.get("remark"):
+        message = parsedResponse.get("remark")
 
-    response_chat_data = ChatCompletionAssistantMessageParam(
+    print("message: ",message)
+    response_chat_data = MessageResponse(
         role="assistant", content=message
     )
     messages.append(response_chat_data)
