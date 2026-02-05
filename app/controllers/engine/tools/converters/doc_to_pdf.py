@@ -1,23 +1,16 @@
-import openai.types.chat
 from pathlib import Path
 import time
 from typing import Literal
 import json
-
-
 from supabase import SupabaseException
-from openai.types.chat import (
-    ChatCompletionAssistantMessageParam,
-)
 from app.controllers.engine.tools.filmmaker.script_writer import SCRIPT_WRITER
 from app.controllers.engine.tools.programmer.code_documentation import (
     CODE_DOCUMENTATION,
 )
 from app.controllers.engine.tools.save.save_to_flow_bucket import save_to_storage
 from app.controllers.engine.tools.search.google_trends import GOOGLE_TRENDS
-
 from app.models.meta import DocToPDF
-from app.models.models import LinkToOpen, State, Response
+from app.models.models import LinkToOpen, MessageResponse, State, Response
 from xhtml2pdf import pisa
 from app.controllers.get_system_node_by_id import get_node_ui_loading_failed_message
 
@@ -36,7 +29,7 @@ async def manage_file_store(file_name: str, state: State):
         flow_id=state.get("flow_id"),
         local_file_path=local_file_path,
     )
-    
+    print("doc_response_path: ",doc_response_path)
     return doc_response_path
 
 DOC_TO_PDF="doc_to_pdf"
@@ -69,7 +62,8 @@ async def doc_to_pdf(state: State):
     else:
         content = state.get("response").get("messages")[-1].get("content")
         filename = f"{time.time_ns()}"
-        
+    print("content: ",content)
+    print("filename: ",filename)
     response_filename = convert_to_pdf(
         content_type="html",
         flow_id=state.get("flow_id"),
@@ -78,7 +72,7 @@ async def doc_to_pdf(state: State):
     )
     try:
         document_path=await manage_file_store(file_name=response_filename, state=state)
-        response_chat_data = ChatCompletionAssistantMessageParam(
+        response_chat_data = MessageResponse(
             role="assistant", content="PDF Document generated."
         )
         doc_meta=DocToPDF(node_id=state.get("node_data").get("node_graph_id"),type=DOC_TO_PDF,url=document_path)
@@ -90,6 +84,7 @@ async def doc_to_pdf(state: State):
             "meta": [*state.get("response").get("meta"), json.dumps(meta)],
             "links_to_open":[*state.get("response").get("links_to_open"),json.dumps(link_to_open)]
         }
+        print("RESPONSE:: ",response)
         state["response"] = response
         return state
 

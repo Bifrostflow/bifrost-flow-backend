@@ -1,7 +1,7 @@
 import ast
 from langgraph.constants import START
 from langgraph.graph.state import CompiledStateGraph
-from openai.types.chat import ChatCompletionUserMessageParam
+from langchain_core.messages import HumanMessage
 from starlette.responses import StreamingResponse
 import asyncio
 import json
@@ -10,7 +10,7 @@ from supabase import SupabaseException
 from app.controllers.engine.runflow import create_graph, convert_edges_to_nodes
 from app.controllers.get_system_node_by_id import get_node_ui_loading_message
 from app.controllers.supabase_auth.create_user import check_user_exist
-from app.models.models import Response, State, GraphData
+from app.models.models import MessageResponse, Response, State, GraphData
 from jose import jwt
 from app.db.supa_base import super_supabase
 
@@ -31,7 +31,7 @@ async def get_user_keys(flow_id:str,user_id:str):
     )
     return keys_data
 
-async def check_bollaborator_access(flow_id:str,user_id:str):
+async def check_collaborator_access(flow_id:str,user_id:str):
         collaborators_data = (
                 super_supabase.table("flows")
                 .select("users")
@@ -73,9 +73,7 @@ async def use_run_flow(jwks: any, token: str, data: GraphData):
 
                 # return nodes
                 graph = await create_graph(nodes)
-                user_prompt = ChatCompletionUserMessageParam(
-                    role="user", content=data.input
-                )
+                user_prompt = MessageResponse(role="user",content=data.input)
                 messages = [user_prompt]
                 response: Response = {"messages": messages, "type": None, "meta": [],"links_to_open":[]}
                 # fetch key from user
@@ -131,7 +129,7 @@ async def stream_graph(graph: CompiledStateGraph, state: State, flow_id: str):
         chunk_data: State = {
                 "node_data": state.get("node_data"),
                 "response": {
-                            "messages": {"role":"assistant","content":"Thanks! I’ve got your query and I’m on it."},
+                            "messages": MessageResponse(role="assistant",content="Thanks! I’ve got your query and I’m on it."),
                             "meta": {},
                             "type": "",
                             "links_to_open":state.get("response").get("links_to_open")

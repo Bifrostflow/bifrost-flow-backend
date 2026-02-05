@@ -1,8 +1,8 @@
 from app.controllers.engine.tools.conditional.classify_message import classify_message
 from app.controllers.engine.tools.conditional.route_query import route_query
+from app.controllers.engine.tools.messaging.write_mail_and_send import send_mail
 from app.controllers.engine.tools.converters.doc_to_pdf import doc_to_pdf
 from app.controllers.engine.tools.filmmaker.script_writer import script_writer
-from app.controllers.engine.tools.messaging.write_mail_and_send import send_mail
 from app.controllers.engine.tools.programmer.code_documentation import (
     code_documentation,
 )
@@ -15,12 +15,12 @@ from app.controllers.engine.tools.create_tweet import create_tweet
 
 
 distribute = {
-    "classify_message": classify_message,
-    "evaluate_code": evaluate_code,
     "write_message": write_message,
-    "write_mail_and_send": send_mail,
-    "write_code": write_code,
+    "classify_message": classify_message,
     "conditional_routing": route_query,
+    "write_code": write_code,
+    "evaluate_code": evaluate_code,
+    "write_mail_and_send": send_mail,
     "code_documentation": code_documentation,
     "doc_to_pdf": doc_to_pdf,
     "tavily_search": tavily_search,
